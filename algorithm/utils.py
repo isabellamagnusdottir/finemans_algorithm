@@ -31,10 +31,7 @@ def bellman_ford(neg_edges,weights,dist):
             dist[v] = alt_dist
     return dist
 
-def bfd(source,graph,neg_edges,weights,beta):
-    dist = [np.inf]*len(graph.keys())
-    dist[source] = 0
-    
+def bfd(source,graph,neg_edges,weights,dist,beta):
     dist = dijkstra(source,graph,neg_edges,weights,dist)
     for _ in range(beta):
         dist = bellman_ford(neg_edges,weights,dist)
@@ -42,6 +39,8 @@ def bfd(source,graph,neg_edges,weights,beta):
     return dist
 
 def b_hop_sssp(source,graph,neg_edges,weights,beta):
+    dist = [np.inf]*len(graph.keys())
+    dist[source] = 0
     return bfd(source,graph,neg_edges,weights,beta)
 
 def b_hop_stsp(target,graph,weights,beta):
@@ -60,3 +59,23 @@ def transpose_graph(graph,weights):
                 t_neg_edges.append[(v,k)]
 
     return t_graph,t_neg_edges,t_weights
+
+# TODO: consider refactoring cycle detection
+def super_source_bfd(graph,neg_edges,weights,beta, cycleDetection = False):
+
+    super_source = len(graph)
+    for v in graph:
+        graph[super_source].append(v)
+        weights[(super_source, v)] = 0
+
+    distances1 = b_hop_sssp(super_source, graph, neg_edges, weights, beta)
+    if cycleDetection:
+        distances2 = bfd(super_source, graph, neg_edges, weights, distances1, beta)
+        
+        for v in graph.keys():
+            if distances2[v] < distances1[v]:
+                # TODO: implement cycle error
+                raise ValueError
+ 
+    return distances1
+
