@@ -1,8 +1,7 @@
-from collections import defaultdict
 import numpy as np
 from queue import PriorityQueue
 
-def dijkstra(source,graph,neg_edges,weights,dist):
+def dijkstra(source, graph: dict[int, set[tuple[int, int]]], neg_edges, dist):
     pq = PriorityQueue()
 
     for v in graph.keys():
@@ -16,61 +15,58 @@ def dijkstra(source,graph,neg_edges,weights,dist):
         for v in graph[u]:
             if (u,v) in neg_edges:
                 continue
-            alt_dist = dist[u]+weights[(u,v)]
+            alt_dist = dist[u]+graph[u][v]
             if alt_dist < dist[v]:
                 dist[v] = alt_dist
                 pq.put((alt_dist,v))
 
     return dist
 
-def bellman_ford(neg_edges,weights,dist):
+def bellman_ford(graph : dict[int, set[tuple[int, int]]], neg_edges,dist):
     for e in neg_edges:
         (u,v) = e
-        alt_dist = dist[u] + weights[(u,v)]
+        alt_dist = dist[u] + graph[u][v]
         if alt_dist < dist[v]:
             dist[v] = alt_dist
     return dist
 
-def bfd(source,graph,neg_edges,weights,dist,beta):
-    dist = dijkstra(source,graph,neg_edges,weights,dist)
+def bfd(source, graph, neg_edges, dist, beta):
+    dist = dijkstra(source, graph, neg_edges, dist)
     for _ in range(beta):
-        dist = bellman_ford(neg_edges,weights,dist)
-        dist = dijkstra(source,graph,neg_edges,weights,dist)
+        dist = bellman_ford(graph, neg_edges, dist)
+        dist = dijkstra(source, graph, neg_edges, dist)
     return dist
 
-def b_hop_sssp(source,graph,neg_edges,weights,beta):
+def b_hop_sssp(source, graph, neg_edges, beta):
     dist = [np.inf]*len(graph.keys())
     dist[source] = 0
-    return bfd(source,graph,neg_edges,weights,beta)
+    return bfd(source, graph, neg_edges, beta)
 
-def b_hop_stsp(target,graph,weights,beta):
-    t_graph,t_neg_edges,t_weights = transpose_graph(graph,weights)
-    return b_hop_sssp(target,t_graph,t_neg_edges,t_weights,beta)
+def b_hop_stsp(target, graph, beta):
+    t_graph, t_neg_edges = transpose_graph(graph)
+    return b_hop_sssp(target, t_graph, t_neg_edges, beta)
 
-def transpose_graph(graph,weights):
-    t_graph = defaultdict(list)
-    t_weights = {}
+def transpose_graph(graph: dict[int, set[tuple[int, int]]]):
+    t_graph = {}
     t_neg_edges = []
-    for k,neighbors in graph.items():
-        for v in neighbors:
-            t_graph[v].append(k)
-            t_weights[(v,k)] = weights[(k,v)]
-            if weights[(k,v)] < 0:
+    for k, neighbors in graph.items():
+        for v, w in neighbors:
+            t_graph[v].add((k,w))
+            if w < 0:
                 t_neg_edges.append[(v,k)]
 
-    return t_graph,t_neg_edges,t_weights
+    return t_graph, t_neg_edges
 
 # TODO: consider refactoring cycle detection
-def super_source_bfd(graph,neg_edges,weights,beta, cycleDetection = False):
+def super_source_bfd(graph, neg_edges, beta, cycleDetection = False):
 
     super_source = len(graph)
     for v in graph:
-        graph[super_source].append(v)
-        weights[(super_source, v)] = 0
+        graph[super_source].add((v,0))
 
-    distances1 = b_hop_sssp(super_source, graph, neg_edges, weights, beta)
+    distances1 = b_hop_sssp(super_source, graph, neg_edges, beta)
     if cycleDetection:
-        distances2 = bfd(super_source, graph, neg_edges, weights, distances1, beta)
+        distances2 = bfd(super_source, graph, neg_edges, distances1, beta)
         
         for v in graph.keys():
             if distances2[v] < distances1[v]:
@@ -78,4 +74,3 @@ def super_source_bfd(graph,neg_edges,weights,beta, cycleDetection = False):
                 raise ValueError
  
     return distances1
-
