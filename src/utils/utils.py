@@ -48,12 +48,20 @@ def b_hop_stsp(target, graph, beta):
 
 def transpose_graph(graph: dict[int, set[tuple[int, int]]]):
     t_graph = {}
-    t_neg_edges = []
+    t_neg_edges = set()
+
     for k, neighbors in graph.items():
+        if k not in t_graph:
+            t_graph[k] = set()
+
         for v, w in neighbors:
+            if v not in t_graph:
+                t_graph[v] = set()
+            
             t_graph[v].add((k,w))
+            
             if w < 0:
-                t_neg_edges.append[(v,k)]
+                t_neg_edges.add((v,k))
 
     return t_graph, t_neg_edges
 
@@ -74,3 +82,13 @@ def super_source_bfd(graph, neg_edges, beta, cycleDetection = False):
                 raise ValueError
  
     return distances1
+
+def get_set_of_neg_vertices(graph):
+    neg_vertices = set()
+
+    for vertex, edge in graph.items():
+        for _, weight in edge:
+            if weight < 0:
+                neg_vertices.add(vertex)
+    
+    return neg_vertices

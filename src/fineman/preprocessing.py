@@ -1,7 +1,12 @@
 from math import ceil
 from collections import deque
+from utils import get_set_of_neg_vertices, transpose_graph
 
-def ensure_neg_vertices_has_degree_of_one(graph: dict[int, set[tuple[int, int]]], neg_vertices: list, n: int):
+def ensure_neg_vertices_has_degree_of_one(graph: dict[int, set[tuple[int, int]]]):
+    
+    n = len(graph.keys())
+    neg_vertices = get_set_of_neg_vertices(graph)
+
     for vertex in neg_vertices:
         if len(graph[vertex]) > 1:
             
@@ -21,7 +26,11 @@ def ensure_neg_vertices_has_degree_of_one(graph: dict[int, set[tuple[int, int]]]
     return graph
 
 
-def ensure_max_degree(graph: dict[int, set[tuple[int, int]]], n: int, threshold: int):
+def ensure_max_degree(graph: dict[int, set[tuple[int, int]]], threshold: int):
+
+    print("her... Jakob + Isabella = <3")
+    print(graph)
+    n = len(graph.keys())
 
     split_queue = deque()
 
@@ -56,3 +65,17 @@ def ensure_max_degree(graph: dict[int, set[tuple[int, int]]], n: int, threshold:
         # TODO: consider if it even happens that the first one does not, but the second does?
 
     return graph
+
+
+def preproces_graph(graph, threshold):
+    transformed_graph = ensure_neg_vertices_has_degree_of_one(graph)
+
+    # ensure for out-degree
+    transformed_graph = ensure_max_degree(transformed_graph, threshold)
+
+    # ensure for in-degree
+    transposed_graph, _ = transpose_graph(transformed_graph)
+    final_transposed_graph = ensure_max_degree(transposed_graph, threshold)
+    
+    return transpose_graph(final_transposed_graph)[0]
+
