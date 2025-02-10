@@ -28,8 +28,6 @@ def ensure_neg_vertices_has_degree_of_one(graph: dict[int, set[tuple[int, int]]]
 
 def ensure_max_degree(graph: dict[int, set[tuple[int, int]]], threshold: int):
 
-    print("her... Jakob + Isabella = <3")
-    print(graph)
     n = len(graph.keys())
 
     split_queue = deque()
