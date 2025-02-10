@@ -75,13 +75,14 @@ def test_multiple_splits_on_hundred_vertex_graph(threshold, expected):
 
 
 # TESTS ON ENTIRE PREPROCESSING SEQUENCE
-@pytest.mark.parametrize("filename,threshold", [
-    ("small_graph_with_neg_edges.json", 2),
-    ("high_in_degree_graph.json", 5)
+@pytest.mark.parametrize("filename,n,m", [
+    ("small_graph_with_neg_edges.json", 6, 8),
+    ("high_in_degree_graph.json", 20, 19)
 ])
-def test_on_graph(filename, threshold):
+def test_on_graph(filename, n, m):
     graph = load_test_case(TESTDATA_FILEPATH + filename)
-    graph = preproces_graph(graph, threshold)
+    graph = preproces_graph(graph, n, m)
+    threshold = compute_threshold(n, m)
 
     assert all(len(set) <= threshold for set in graph.values())
 

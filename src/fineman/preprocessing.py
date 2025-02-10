@@ -2,6 +2,8 @@ from math import ceil
 from collections import deque
 from utils import get_set_of_neg_vertices, transpose_graph
 
+SCALAR_FOR_THRESHOLD = 4
+
 def ensure_neg_vertices_has_degree_of_one(graph: dict[int, set[tuple[int, int]]]):
     
     n = len(graph.keys())
@@ -18,9 +20,8 @@ def ensure_neg_vertices_has_degree_of_one(graph: dict[int, set[tuple[int, int]]]
             graph[vertex] = {(new_vertex, most_neg_weight)}
 
             # change weights on existing edges
+            graph[new_vertex] = set()
             for (neighbour, weight) in old_neighbours:
-                if new_vertex not in graph:
-                    graph[new_vertex] = set()
                 graph[new_vertex].add((neighbour, weight - most_neg_weight))
 
     return graph
@@ -65,7 +66,20 @@ def ensure_max_degree(graph: dict[int, set[tuple[int, int]]], threshold: int):
     return graph
 
 
-def preproces_graph(graph, threshold):
+def compute_threshold(n: int, m: int):
+    threshold = ceil((m / n)) * SCALAR_FOR_THRESHOLD
+    
+    # TODO: implement InvalidThresholdError
+    if threshold <= 2:
+        raise ValueError
+    
+    return threshold
+
+
+def preproces_graph(graph, n, m):
+
+    threshold = compute_threshold(n, m)
+
     transformed_graph = ensure_neg_vertices_has_degree_of_one(graph)
 
     # ensure for out-degree
