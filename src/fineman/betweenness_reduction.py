@@ -1,7 +1,7 @@
 from collections import defaultdict
 import numpy as np
 import random as rand
-from utils import b_hop_sssp, b_hop_stsp, super_source_bfd
+from .helper_functions import b_hop_sssp, b_hop_stsp, super_source_bfd
 
 def betweenness_reduction(graph, vertices, pos_edges, neg_edges, tau, beta, c):
     if (beta < 1) or (tau < 1) or (tau > len(vertices)) or (c <= 1):
