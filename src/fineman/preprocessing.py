@@ -1,6 +1,6 @@
 from math import ceil
 from collections import deque
-from utils import get_set_of_neg_vertices, transpose_graph
+from .helper_functions import get_set_of_neg_vertices, transpose_graph
 
 SCALAR_FOR_THRESHOLD = 4
 
