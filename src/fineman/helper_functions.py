@@ -5,26 +5,25 @@ def dijkstra(source, graph: dict[int, set[tuple[int, int]]], neg_edges, dist):
     pq = PriorityQueue()
 
     for v in graph.keys():
-        pq.put((dist[v],v))
-    pq.put(dist[source],v)
+        pq.put((dist[v], v))
+    #pq.put((dist[source], source))
 
     while not pq.empty():
         current_dist, u = pq.get()
         if current_dist > dist[u]:
             continue
-        for v in graph[u]:
+        for v, weight in graph[u]:
             if (u,v) in neg_edges:
                 continue
-            alt_dist = dist[u]+graph[u][v]
+            alt_dist = dist[u] + weight
             if alt_dist < dist[v]:
                 dist[v] = alt_dist
                 pq.put((alt_dist,v))
 
     return dist
 
-def bellman_ford(graph : dict[int, set[tuple[int, int]]], neg_edges,dist):
-    for e in neg_edges:
-        (u,v) = e
+def bellman_ford(graph : dict[int, dict[tuple[int, int]]], neg_edges,dist):
+    for (u,v) in neg_edges:
         alt_dist = dist[u] + graph[u][v]
         if alt_dist < dist[v]:
             dist[v] = alt_dist
