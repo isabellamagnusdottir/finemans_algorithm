@@ -3,7 +3,7 @@ import numpy as np
 import random as rand
 from .helper_functions import b_hop_sssp, b_hop_stsp, super_source_bfd
 
-def betweenness_reduction(graph, vertices, pos_edges, neg_edges, tau, beta, c):
+def betweenness_reduction(graph: dict[int, dict[int, int]], vertices, pos_edges, neg_edges, tau, beta, c):
     if (beta < 1) or (tau < 1) or (tau > len(vertices)) or (c <= 1):
         raise ValueError
     rand.seed(42)
@@ -23,7 +23,7 @@ def betweenness_reduction(graph, vertices, pos_edges, neg_edges, tau, beta, c):
     return super_source_bfd(h_graph, h_neg_edges, l, cycleDetection=True)
 
 
-def construct_h(graph, T, distances):
+def construct_h(graph: dict[int, dict[int, int]], T, distances):
     h_graph = defaultdict(list)
     h_neg_edges = {}
 
