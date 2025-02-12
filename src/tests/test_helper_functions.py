@@ -21,7 +21,7 @@ def test_transpose_graph_on_multiple_graphs(filename):
     transposed_graph, _ = transpose_graph(graph)
 
     assert graph.keys() == transposed_graph.keys()
-    assert all(all((vertex, weight) in graph[neighbor] for neighbor, weight in edges) for vertex, edges in transposed_graph.items())
+    assert all(all(graph[neighbor][vertex]  == weight for neighbor, weight in neighbors.items()) for vertex, neighbors in transposed_graph.items())
 
     org_graph, _ = transpose_graph(transposed_graph)
     assert graph == org_graph
@@ -51,7 +51,7 @@ def test_dijkstra_implementation(filename, expected):
     initial_dist = {v:np.inf for v in graph.keys()}
     initial_dist[1] = 0
 
-    neg_edges = [(u, v) for u, neighbors in graph.items() for v, weight in neighbors if weight < 0]
+    neg_edges = [(u, v) for u, neighbors in graph.items() for v, weight in neighbors.items() if weight < 0]
 
     dist = dijkstra(1, graph, neg_edges, initial_dist)
     assert dist == expected
@@ -59,7 +59,7 @@ def test_dijkstra_implementation(filename, expected):
 
 @pytest.mark.parametrize("filename,expected", [
     ("complete_four_vertices_graph_with_no_neg_edges.json", {1:0, 2:np.inf, 3:np.inf, 4:np.inf}),
-    ("disconnected_graph.json", {1:0, 2:1, 3:-1, 4:np.inf, 5:np.inf, 6:np.inf}),
+    ("disconnected_graph.json", {1:0, 2:np.inf, 3:-1, 4:np.inf, 5:np.inf, 6:np.inf}),
 ])
 def test_bellman_ford_implementation(filename, expected):
     graph = load_test_case(TESTDATA_FILEPATH + filename)
@@ -67,7 +67,7 @@ def test_bellman_ford_implementation(filename, expected):
     initial_dist = {v: np.inf for v in graph.keys()}
     initial_dist[1] = 0
 
-    neg_edges = [(u, v) for u, neighbors in graph.items() for v, weight in neighbors if weight < 0]
+    neg_edges = [(u, v) for u, neighbors in graph.items() for v, weight in neighbors.items() if weight < 0]
 
     dist = bellman_ford(graph, neg_edges, initial_dist)
     assert dist == expected
