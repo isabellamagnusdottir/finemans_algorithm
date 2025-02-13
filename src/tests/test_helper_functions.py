@@ -1,4 +1,3 @@
-import numpy as np
 import pytest
 
 from fineman.helper_functions import *
@@ -13,10 +12,11 @@ TESTDATA_FILEPATH = "src/tests/test_data/"
     "small_graph_with_neg_edges.json",
     "tree_graph_single_root_with_100_children.json",
     "graph_with_no_edges.json",
-    "disconnected_graph.json"
+    "disconnected_graph.json",
+    "path_with_only_neg_edges.json"
 ])
 def test_transpose_graph_on_multiple_graphs(filename):
-    graph = load_test_case(TESTDATA_FILEPATH + filename)
+    graph, _ = load_test_case(TESTDATA_FILEPATH + filename)
 
     transposed_graph, _ = transpose_graph(graph)
 
@@ -34,40 +34,143 @@ def test_transpose_graph_on_multiple_graphs(filename):
     ("small_graph_with_neg_edges.json", [1,3])
 ])
 def test_negative_vertices_set(filename, expected):
-    graph = load_test_case(TESTDATA_FILEPATH + filename)
+    graph, _ = load_test_case(TESTDATA_FILEPATH + filename)
     actual = get_set_of_neg_vertices(graph)
-
     assert actual == set(expected)
 
+
 @pytest.mark.parametrize("filename,expected", [
-    ("complete_four_vertices_graph_with_no_neg_edges.json", {1:0, 2:1, 3:1, 4:1}),
-    ("disconnected_graph.json", {1:0, 2:1, 3:2, 4:np.inf, 5:np.inf, 6: np.inf}),
-    ("small_graph_with_neg_edges.json", {1:0, 2:5, 3:11, 4:np.inf, 5:6, 6:7}),
-    ("graph_with_no_edges.json", {1: 0, 2:np.inf, 3:np.inf, 4:np.inf, 5:np.inf, 6: np.inf}),
+    ("complete_four_vertices_graph_with_no_neg_edges.json", [np.inf, 0, 1, 1, 1]),
+    ("disconnected_graph.json", [np.inf, 0, 1, 2, np.inf, np.inf, np.inf]),
+    ("path_with_only_neg_edges.json", [np.inf, 0, np.inf, np.inf, np.inf, np.inf, np.inf]),
+    ("small_graph_with_neg_edges.json", [np.inf, 0, 5, 11, np.inf, 6, 7]),
+    ("graph_with_no_edges.json", [np.inf, 0, np.inf, np.inf, np.inf, np.inf, np.inf]),
+    ("path_tricky.json", [np.inf, 0, 0, 10, 10, 10, 10])
 ])
 def test_dijkstra_implementation(filename, expected):
-    graph = load_test_case(TESTDATA_FILEPATH + filename)
+    graph, neg_edges = load_test_case(TESTDATA_FILEPATH + filename)
 
-    initial_dist = {v:np.inf for v in graph.keys()}
+    initial_dist = [np.inf]*(len(graph.keys())+1)
     initial_dist[1] = 0
-
-    neg_edges = [(u, v) for u, neighbors in graph.items() for v, weight in neighbors.items() if weight < 0]
 
     dist = dijkstra(1, graph, neg_edges, initial_dist)
     assert dist == expected
 
 
 @pytest.mark.parametrize("filename,expected", [
-    ("complete_four_vertices_graph_with_no_neg_edges.json", {1:0, 2:np.inf, 3:np.inf, 4:np.inf}),
-    ("disconnected_graph.json", {1:0, 2:np.inf, 3:-1, 4:np.inf, 5:np.inf, 6:np.inf}),
+    ("complete_four_vertices_graph_with_no_neg_edges.json", [np.inf, 0, np.inf, np.inf, np.inf]),
+    ("disconnected_graph.json", [np.inf, 0, np.inf, -1, np.inf, np.inf, np.inf]),
+    ("path_with_only_neg_edges.json", [np.inf, 0, -1, np.inf, np.inf, np.inf, np.inf]),
+    ("path_tricky.json", [np.inf, 0, np.inf, np.inf, np.inf, np.inf, np.inf]),
 ])
 def test_bellman_ford_implementation(filename, expected):
-    graph = load_test_case(TESTDATA_FILEPATH + filename)
+    graph, neg_edges = load_test_case(TESTDATA_FILEPATH + filename)
 
-    initial_dist = {v: np.inf for v in graph.keys()}
+    initial_dist = [np.inf]*(len(graph.keys())+1)
     initial_dist[1] = 0
-
-    neg_edges = [(u, v) for u, neighbors in graph.items() for v, weight in neighbors.items() if weight < 0]
 
     dist = bellman_ford(graph, neg_edges, initial_dist)
     assert dist == expected
+
+
+@pytest.mark.parametrize("filename,beta,expected", [
+    ("graph_with_no_edges.json", 1, [np.inf, 0, np.inf, np.inf, np.inf, np.inf, np.inf]),
+    ("disconnected_graph.json", 0, [np.inf, 0, 1, 2, np.inf, np.inf, np.inf]),
+    ("disconnected_graph.json", 1, [np.inf, 0, 1, -1, np.inf, np.inf, np.inf]),
+    ("path_with_only_neg_edges.json", 0, [np.inf, 0, np.inf, np.inf, np.inf, np.inf, np.inf]),
+    ("path_with_only_neg_edges.json", 1, [np.inf, 0, -1, np.inf, np.inf, np.inf, np.inf]),
+    ("path_with_only_neg_edges.json", 2, [np.inf, 0, -1, -2, np.inf, np.inf, np.inf]),
+    ("path_with_only_neg_edges.json", 3, [np.inf, 0, -1, -2, -3, np.inf, np.inf]),
+    ("small_graph_with_neg_edges.json", 0, [np.inf, 0, 5, 11, np.inf, 6, 7]),
+    ("small_graph_with_neg_edges.json", 1, [np.inf, 0, 5, 11, -2, 0, 1]),
+    ("graph_with_neg_edges.json", 0, [np.inf, 0, 3, 25, 7, np.inf, 11, 16, np.inf, np.inf, 20, np.inf, np.inf, np.inf, 19]),
+    ("graph_with_neg_edges.json", 1, [np.inf, 0, 3, -6, 7, 5, 11, 8, 1, 2, 20, 4, 6, 11, 11]),
+    ("graph_with_neg_edges.json", 2, [np.inf, 0, 3, -6, 7, -7, 11, -5, 1, -11, 20, -9, 6, -2, -2]),
+    ("graph_with_neg_edges.json", 3, [np.inf, 0, 3, -6, 7, -7, 11, -5, 1, -11, 20, -9, 6, -2, -2]),
+    ("path_tricky.json", 0, [np.inf, 0, 0, 10, 10, 10, 10]),
+    ("path_tricky.json", 1, [np.inf, 0, 0, -1, 9, 9, 9]),
+    ("path_tricky.json", 2, [np.inf, 0, 0, -1, -2, 8, 8]),
+    ("path_tricky.json", 3, [np.inf, 0, 0, -1, -2, -3, 7]),
+    ("path_tricky.json", 4, [np.inf, 0, 0, -1, -2, -3, -4]),
+])
+def test_beta_hop_sssp_implementation(filename, beta, expected):
+    graph, neg_edges = load_test_case(TESTDATA_FILEPATH + filename)
+
+    dist = b_hop_sssp(1, graph, neg_edges, beta)
+    assert dist == expected
+
+
+@pytest.mark.parametrize("filename,beta,expected", [
+    ("graph_with_no_edges.json", 1, [np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, 0]),
+    ("disconnected_graph.json", 0, [np.inf, np.inf, np.inf, np.inf, 2, 1, 0]),
+    ("disconnected_graph.json", 1, [np.inf, np.inf, np.inf, np.inf, 0, 1, 0]),
+    ("path_with_only_neg_edges.json", 0, [np.inf, np.inf, np.inf, np.inf, np.inf, np.inf, 0]),
+    ("path_with_only_neg_edges.json", 1, [np.inf, np.inf, np.inf, np.inf, np.inf, -1, 0]),
+    ("path_with_only_neg_edges.json", 2, [np.inf, np.inf, np.inf, np.inf, -2, -1, 0]),
+    ("path_with_only_neg_edges.json", 3, [np.inf, np.inf, np.inf, -3, -2, -1, 0]),
+    ("small_graph_with_neg_edges.json", 0, [np.inf, 7, 10, 4, 3, 1, 0]),
+    ("small_graph_with_neg_edges.json", 1, [np.inf, 1, 4, -2, 3, 1, 0]),
+    ("graph_with_neg_edges.json", 0, [np.inf, 19, np.inf, np.inf, 12, 8, 8, 3, 10, 9, np.inf, 7, np.inf, 10, 0]),
+    ("graph_with_neg_edges.json", 1, [np.inf, 11, 8, 4, 6, 8, 5, 3, 10, 9, -4, 7, 7, 10, 0]),
+    ("graph_with_neg_edges.json", 2, [np.inf, -2, 8, 4, 6, 8, 5, 3, 10, 9, -4, 7, 7, 10, 0]),
+    ("graph_with_neg_edges.json", 3, [np.inf, -2, 8, 4, 6, 8, 5, 3, 10, 9, -4, 7, 7, 10, 0]),
+    ("path_tricky.json", 0, [np.inf, 10, np.inf, np.inf, np.inf, np.inf, 0]),
+    ("path_tricky.json", 1, [np.inf, 9, np.inf, np.inf, np.inf, -1, 0]),
+    ("path_tricky.json", 2, [np.inf, 8, np.inf, np.inf, -2, -1, 0]),
+    ("path_tricky.json", 3, [np.inf, 7, np.inf, -3, -2, -1, 0]),
+    ("path_tricky.json", 4, [np.inf, -4, -4, -3, -2, -1, 0]),
+    ("path_tricky.json", 5, [np.inf, -4, -4, -3, -2, -1, 0]),
+])
+def test_beta_hop_stsp_implementation(filename, beta, expected):
+    graph, _ = load_test_case(TESTDATA_FILEPATH + filename)
+
+    dist = b_hop_stsp(len(graph.keys()), graph, beta)
+    assert dist == expected
+
+
+@pytest.mark.parametrize("filename,beta,expected", [
+    ("graph_with_no_edges.json", 0, [np.inf, 0, 0, 0, 0, 0, 0]),
+    ("disconnected_graph.json", 0, [np.inf, 0, 0, 0, 0, 0, 0]),
+    ("disconnected_graph.json", 1, [np.inf, 0, 0, -1, 0, -1, 0]),
+    ("path_with_only_neg_edges.json", 0, [np.inf, 0, 0, 0, 0, 0, 0]),
+    ("path_with_only_neg_edges.json", 1, [np.inf, 0, -1, -1, -1, -1, -1]),
+    ("path_with_only_neg_edges.json", 2, [np.inf, 0, -1, -2, -2, -2, -2]),
+    ("path_with_only_neg_edges.json", 3, [np.inf, 0, -1, -2, -3, -3, -3]),
+    ("path_with_only_neg_edges.json", 4, [np.inf, 0, -1, -2, -3, -4, -4]),
+    ("path_tricky.json", 0, [np.inf, 0, 0, 0, 0, 0, 0]),
+    ("path_tricky.json", 1, [np.inf, 0, 0, -1, -1, -1, -1]),
+    ("path_tricky.json", 2, [np.inf, 0, 0, -1, -2, -2, -2]),
+    ("small_graph_with_neg_edges.json", 1, [np.inf, 0, 0, 0, -2, -3, -2]),
+    ("graph_with_neg_edges.json", 1, [np.inf, 0, 0, -6, 0, -2, 0, 0, -2, -5, 0, -3, 0, -3, -4]),
+    ("graph_with_neg_edges.json", 2, [np.inf, 0, 0, -6, 0, -7, 0, -5, -2, -11, 0, -9, 0, -3, -4]),
+    ("graph_with_neg_edges.json", 3, [np.inf, 0, 0, -6, 0, -7, 0, -5, -2, -11, 0, -9, 0, -3, -4])
+])
+def test_super_source_bfd_without_cycle_detection(filename, beta, expected):
+    graph, neg_edges = load_test_case(TESTDATA_FILEPATH + filename)
+
+    dist = super_source_bfd(graph, neg_edges, beta)
+    assert dist == expected
+
+
+@pytest.mark.parametrize("filename,beta,expected", [
+    ("small_graph_with_neg_edges.json", 1, [np.inf, 0, 0, 0, -2, -3, -2]),
+    ("graph_with_neg_edges.json", 2, [np.inf, 0, 0, -6, 0, -7, 0, -5, -2, -11, 0, -9, 0, -3, -4]),
+])
+def test_super_source_bfd_cycle_detection_on_graphs_without_neg_cycles(filename, beta, expected):
+    graph, neg_edges = load_test_case(TESTDATA_FILEPATH + filename)
+    dist = super_source_bfd(graph, neg_edges, beta, cycleDetection=True)
+    assert dist == expected
+
+
+@pytest.mark.parametrize("filename,beta", [
+    ("negative_cycle.json", 1),
+    ("negative_cycle.json", 2),
+    ("negative_cycle.json", 3),
+    ("graph_with_neg_cycle.json", 2),
+    ("graph_with_neg_cycle.json", 3),
+    ("graph_with_neg_cycle.json", 10)
+])
+def test_super_source_bfd_cycle_detection_on_graphs_with_neg_cycles(filename, beta):
+    graph, neg_edges = load_test_case(TESTDATA_FILEPATH + filename)
+    with pytest.raises(ValueError):
+        super_source_bfd(graph, neg_edges, beta, cycleDetection=True)
