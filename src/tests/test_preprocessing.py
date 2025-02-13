@@ -6,20 +6,20 @@ TESTDATA_FILEPATH = "src/tests/test_data/"
 
 # DEGREE OF ONE TESTS
 def test_ensure_degree_of_one_for_tree_with_neg_root():
-    graph = load_test_case(TESTDATA_FILEPATH + "tree_graph_two_layered_negative_root.json")
+    graph, _ = load_test_case(TESTDATA_FILEPATH + "tree_graph_two_layered_negative_root.json")
     assert len(graph[1]) == 2
 
     graph = ensure_neg_vertices_has_degree_of_one(graph)
     assert len(graph[1]) == 1
 
 def test_ensure_same_graph_on_graph_with_no_neg_edges():
-    graph = load_test_case(TESTDATA_FILEPATH + "complete_four_vertices_graph_with_no_neg_edges.json")
+    graph, _ = load_test_case(TESTDATA_FILEPATH + "complete_four_vertices_graph_with_no_neg_edges.json")
     new_graph = ensure_neg_vertices_has_degree_of_one(graph)
 
     assert graph == new_graph
 
 def test_graph_already_adhere_to_one_degree_restriction():
-    graph = load_test_case(TESTDATA_FILEPATH + "graph_already_adhere_to_one_degree_restriction.json")
+    graph, _ = load_test_case(TESTDATA_FILEPATH + "graph_already_adhere_to_one_degree_restriction.json")
     new_graph = ensure_neg_vertices_has_degree_of_one(graph)
 
     assert graph == new_graph
@@ -30,14 +30,14 @@ def test_graph_already_adhere_to_one_degree_restriction():
 # DEGREE OF AT MOST THE THRESHOLD TESTS
 @pytest.mark.parametrize("filename,threshold", [("tree_graph_two_layered_negative_root.json", 2), ("graph_already_adhere_to_one_degree_restriction.json", 2)])
 def test_max_degree_already_ensured(filename, threshold):
-    graph = load_test_case(TESTDATA_FILEPATH + filename)
+    graph, _ = load_test_case(TESTDATA_FILEPATH + filename)
     new_graph = ensure_max_degree(graph, threshold)
     
     assert graph ==  new_graph
 
 
 def test_complete_graph_is_doubled():
-    graph = load_test_case(TESTDATA_FILEPATH + "complete_four_vertices_graph_with_no_neg_edges.json")
+    graph, _ = load_test_case(TESTDATA_FILEPATH + "complete_four_vertices_graph_with_no_neg_edges.json")
     threshold = 2
     graph = ensure_max_degree(graph, threshold)
 
@@ -46,7 +46,7 @@ def test_complete_graph_is_doubled():
     assert len(graph.keys()) == 12
 
 def test_one_split_not_enough():
-    graph = load_test_case(TESTDATA_FILEPATH + "tree_graph_single_root_with_7_children.json")
+    graph, _ = load_test_case(TESTDATA_FILEPATH + "tree_graph_single_root_with_7_children.json")
     threshold = 3
     graph = ensure_max_degree(graph, threshold)
 
@@ -55,7 +55,7 @@ def test_one_split_not_enough():
     assert len(graph.keys()) == 12
 
 def test_two_splits_required_on_both_sides():
-    graph = load_test_case(TESTDATA_FILEPATH + "tree_graph_single_root_with_10_children.json")
+    graph, _ = load_test_case(TESTDATA_FILEPATH + "tree_graph_single_root_with_10_children.json")
     threshold = 3
     graph = ensure_max_degree(graph, threshold)
 
@@ -65,7 +65,7 @@ def test_two_splits_required_on_both_sides():
 
 @pytest.mark.parametrize("threshold,expected", [(50, 103), (15, 115), (10, 131)])
 def test_multiple_splits_on_hundred_vertex_graph(threshold, expected):
-    graph = load_test_case(TESTDATA_FILEPATH + "tree_graph_single_root_with_100_children.json")
+    graph, _ = load_test_case(TESTDATA_FILEPATH + "tree_graph_single_root_with_100_children.json")
     graph = ensure_max_degree(graph, threshold)
 
     assert all(len(neighbors) <= threshold for neighbors in graph.values())
@@ -80,7 +80,7 @@ def test_multiple_splits_on_hundred_vertex_graph(threshold, expected):
     ("high_in_degree_graph.json", 20, 19)
 ])
 def test_on_graph(filename, n, m):
-    graph = load_test_case(TESTDATA_FILEPATH + filename)
+    graph, _ = load_test_case(TESTDATA_FILEPATH + filename)
     graph = preprocess_graph(graph, n, m)
     threshold = compute_threshold(n, m)
 
