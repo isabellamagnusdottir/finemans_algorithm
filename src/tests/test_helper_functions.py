@@ -53,7 +53,7 @@ def test_dijkstra_implementation(filename, expected):
     initial_dist = [np.inf]*(len(graph.keys())+1)
     initial_dist[1] = 0
 
-    dist = dijkstra(1, graph, neg_edges, initial_dist)
+    dist = dijkstra(graph, neg_edges, initial_dist)
     assert dist == expected
 
 

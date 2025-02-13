@@ -40,18 +40,18 @@ def bellman_ford(graph : dict[int, dict[int, int]], neg_edges: set, dist: list):
             used_hop_in_round[v] = True
     return dist
 
-def bfd(source, graph, neg_edges, dist: list, beta: int):
-    dist = dijkstra(source, graph, neg_edges, dist)
+def bfd(graph, neg_edges, dist: list, beta: int):
+    dist = dijkstra(graph, neg_edges, dist)
     for _ in range(beta):
         dist = bellman_ford(graph, neg_edges, dist)
-        dist = dijkstra(source, graph, neg_edges, dist)
+        dist = dijkstra(graph, neg_edges, dist)
     return dist
 
 def b_hop_sssp(source, graph: dict[int, dict[int, int]], neg_edges: set, beta):
     dist = [np.inf]*(len(graph.keys())+1)
     dist[source] = 0
 
-    return bfd(source, graph, neg_edges, dist, beta)
+    return bfd(graph, neg_edges, dist, beta)
 
 def b_hop_stsp(target, graph: dict[int, dict[int, int]], beta):
     t_graph, t_neg_edges = transpose_graph(graph)
@@ -86,7 +86,7 @@ def super_source_bfd(graph: dict[int, dict[int, int]], neg_edges: set, beta, cyc
 
     distances1 = b_hop_sssp(super_source, graph, neg_edges, beta)
     if cycleDetection:
-        distances2 = bfd(super_source, graph, neg_edges, distances1.copy(), beta)
+        distances2 = bfd(graph, neg_edges, distances1.copy(), beta)
         
         for v in graph.keys():
             if distances2[v] < distances1[v]:
