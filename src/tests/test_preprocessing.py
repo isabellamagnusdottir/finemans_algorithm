@@ -29,7 +29,7 @@ def test_graph_already_adhere_to_one_degree_restriction():
 
 # DEGREE OF AT MOST THE THRESHOLD TESTS
 @pytest.mark.parametrize("filename,threshold", [("tree_graph_two_layered_negative_root.json", 2), ("graph_already_adhere_to_one_degree_restriction.json", 2)])
-def test_maxdegree_already_ensured(filename, threshold):
+def test_max_degree_already_ensured(filename, threshold):
     graph = load_test_case(TESTDATA_FILEPATH + filename)
     new_graph = ensure_max_degree(graph, threshold)
     
@@ -41,7 +41,7 @@ def test_complete_graph_is_doubled():
     threshold = 2
     graph = ensure_max_degree(graph, threshold)
 
-    assert all(len(set) <= threshold for set in graph.values())
+    assert all(len(neighbors) <= threshold for neighbors in graph.values())
     
     assert len(graph.keys()) == 12
 
@@ -50,7 +50,7 @@ def test_one_split_not_enough():
     threshold = 3
     graph = ensure_max_degree(graph, threshold)
 
-    assert all(len(set) <= threshold for set in graph.values())
+    assert all(len(neighbors) <= threshold for neighbors in graph.values())
     
     assert len(graph.keys()) == 12
 
@@ -59,7 +59,7 @@ def test_two_splits_required_on_both_sides():
     threshold = 3
     graph = ensure_max_degree(graph, threshold)
 
-    assert all(len(set) <= threshold for set in graph.values())
+    assert all(len(neighbors) <= threshold for neighbors in graph.values())
     
     assert len(graph.keys()) == 17
 
@@ -68,7 +68,7 @@ def test_multiple_splits_on_hundred_vertex_graph(threshold, expected):
     graph = load_test_case(TESTDATA_FILEPATH + "tree_graph_single_root_with_100_children.json")
     graph = ensure_max_degree(graph, threshold)
 
-    assert all(len(set) <= threshold for set in graph.values())
+    assert all(len(neighbors) <= threshold for neighbors in graph.values())
     
     assert len(graph.keys()) == expected
 
@@ -81,13 +81,13 @@ def test_multiple_splits_on_hundred_vertex_graph(threshold, expected):
 ])
 def test_on_graph(filename, n, m):
     graph = load_test_case(TESTDATA_FILEPATH + filename)
-    graph = preproces_graph(graph, n, m)
+    graph = preprocess_graph(graph, n, m)
     threshold = compute_threshold(n, m)
 
-    assert all(len(set) <= threshold for set in graph.values())
+    assert all(len(neighbors) <= threshold for neighbors in graph.values())
 
-    assert all(len(set) <= 1 for set in graph.values() if any(weight < 0 for _, weight in set))
+    assert all(len(neighbors) <= 1 for neighbors in graph.values() if any(weight < 0 for weight in neighbors.values()))
 
     transposed_graph, _ = transpose_graph(graph)
-    assert all(len(set) <= threshold for set in transposed_graph.values())
+    assert all(len(neighbors) <= threshold for neighbors in transposed_graph.values())
 
