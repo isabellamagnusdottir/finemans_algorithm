@@ -2,7 +2,8 @@ import pytest
 from fineman.preprocessing import *
 from utils.load_test_case import load_test_case
 
-TESTDATA_FILEPATH = "src/tests/test_data/"
+TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
+
 
 # DEGREE OF ONE TESTS
 def test_ensure_degree_of_one_for_tree_with_neg_root():
