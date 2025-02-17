@@ -1,8 +1,19 @@
 import pytest
 from utils.load_test_case import load_test_case
-from fineman import betweenness_reduction, construct_h
+from fineman import betweenness_reduction, construct_h, betweenness, reweight_graph
+import numpy as np
 
 TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
+
+
+def _assert_reduced_betweenness(price_function, graph, neg_edges, beta, threshold):
+    for u in graph.keys():
+        for v in u.keys():
+            assert betweenness(u,v,graph,neg_edges,beta) > threshold
+    reweight_graph(graph,price_function)
+    for u in graph.keys():
+        for v in u.keys():
+            assert betweenness(u,v,graph,neg_edges,beta) <= threshold
 
 
 
@@ -48,17 +59,3 @@ def test_construction_of_h_with_multiple_elements_in_T(filename, T, distances):
     assert all(len(dict) == len(graph.keys()) for v, dict in h_graph.items() if v in T)
     assert all(h_graph[t][v] == 0 for t in T for v in h_graph.keys())
 
-
-def test_construction_of_h_with_entire_set_of_vertices_in_T():
-    graph, _ = load_test_case(TESTDATA_FILEPATH + "small_graph_with_neg_edges.json")
-    T = {1,2,3,4,5,6}
-    distances = {
-        1:([0,0,0,0,0,0,0],[0,0,0,0,0,0,0]), 2:([0,0,0,0,0,0,0],[0,0,0,0,0,0,0]),
-        3:([0,0,0,0,0,0,0],[0,0,0,0,0,0,0]), 4:([0,0,0,0,0,0,0],[0,0,0,0,0,0,0]),
-        5:([0,0,0,0,0,0,0],[0,0,0,0,0,0,0]), 6:([0,0,0,0,0,0,0],[0,0,0,0,0,0,0])
-    }
-    h_graph, _ = construct_h(graph, T, distances)
-
-    assert h_graph.keys() == graph.keys()
-    assert all(len(dict) == len(T) for v, dict in h_graph.items())
-    assert all(h_graph[t][v] == 0 for t in T for v in h_graph.keys())

@@ -2,14 +2,14 @@ import numpy as np
 import random as rand
 from .helper_functions import b_hop_sssp, b_hop_stsp, super_source_bfd
 
-def betweenness_reduction(graph: dict[int, dict[int, int]], vertices, pos_edges, neg_edges, tau, beta, c):
-    if (beta < 1) or (tau < 1) or (tau > len(vertices)) or (c <= 1):
+def betweenness_reduction(graph: dict[int, dict[int, int]], neg_edges, tau, beta, c):
+    if (beta < 1) or (tau < 1) or (tau > len(graph)) or (c <= 1):
         raise ValueError
     rand.seed(42)
 
-    n = len(vertices)
+    n = len(graph)
     sample_size = c*tau*np.ceil(np.log(n))
-    T = rand.sample(vertices, sample_size)
+    T = rand.sample(graph.keys(), sample_size)
 
     distances = {}
     for x in T:
