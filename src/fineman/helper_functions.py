@@ -98,9 +98,28 @@ def super_source_bfd(graph: dict[int, dict[int, int]], neg_edges: set, beta, cyc
 def get_set_of_neg_vertices(graph: dict[int, dict[int, int]]):
     neg_vertices = set()
 
-    for vertex, edge in graph.items():
-        for weight in edge.values():
+    for vertex, edges in graph.items():
+        for weight in edges.values():
             if weight < 0:
                 neg_vertices.add(vertex)
     
     return neg_vertices
+
+# TODO: Find better name for mid
+# Rethink if this is both the correct way to do it and if this is even neccessary?
+def compute_throughdist(source, mid, target, graph, neg_edges, beta):
+    dist1 = b_hop_sssp(source,graph,neg_edges,beta)
+    dist2 = b_hop_stsp(target,graph,beta)
+    return dist1[mid]+dist2[mid]
+
+def find_betweenness_set(source, target, graph, neg_edges, beta):
+    dist1 = b_hop_sssp(source,graph,neg_edges,beta)
+    dist2 = b_hop_stsp(target,graph,beta)
+    between = set()
+    for x in graph.keys():
+        if dist1[x]+dist2[x] < 0:
+            between.add(x)
+    return between
+
+def betweenness(source, target, graph, neg_edges, beta):
+    return len(find_betweenness_set(source,target,graph,neg_edges,beta))
