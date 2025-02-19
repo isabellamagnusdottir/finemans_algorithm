@@ -2,7 +2,7 @@ import pytest
 from utils.load_test_case import load_test_case
 from fineman import betweenness_reduction, construct_h
 
-TESTDATA_FILEPATH = "src/tests/test_data/"
+TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
 
 
 
