@@ -27,7 +27,7 @@ def bellman_ford(graph : dict[int, dict[int, int]], neg_edges: set, dist: list):
 
     old_dist = dist.copy()
     # TODO: consider it a dict from vertex to bool is better? depends on the ratio between neg_edges and all edges
-    used_hop_in_round = [False] * (len(graph.keys())+1)
+    used_hop_in_round = [False] * (len(graph.keys()))
 
     for (u,v) in neg_edges:
         alt_dist = dist[u] + graph[u][v]
@@ -48,7 +48,7 @@ def bfd(graph, neg_edges, dist: list, beta: int):
     return dist
 
 def b_hop_sssp(source, graph: dict[int, dict[int, int]], neg_edges: set, beta):
-    dist = [np.inf]*(len(graph.keys())+1)
+    dist = [np.inf]*(len(graph.keys()))
     dist[source] = 0
 
     return bfd(graph, neg_edges, dist, beta)
@@ -79,9 +79,9 @@ def transpose_graph(graph: dict[int, dict[int, int]]):
 # TODO: consider refactoring cycle detection
 def super_source_bfd(graph: dict[int, dict[int, int]], neg_edges: set, beta, cycleDetection = False):
 
-    super_source = len(graph)+1
+    super_source = len(graph)
     graph[super_source] = {}
-    for v in range(1, len(graph)):
+    for v in range(0, len(graph)-1):
         graph[super_source][v] = 0
 
     distances1 = b_hop_sssp(super_source, graph, neg_edges, beta)
@@ -98,9 +98,37 @@ def super_source_bfd(graph: dict[int, dict[int, int]], neg_edges: set, beta, cyc
 def get_set_of_neg_vertices(graph: dict[int, dict[int, int]]):
     neg_vertices = set()
 
-    for vertex, edge in graph.items():
-        for weight in edge.values():
+    for vertex, edges in graph.items():
+        for weight in edges.values():
             if weight < 0:
                 neg_vertices.add(vertex)
     
     return neg_vertices
+
+# TODO: Find better name for mid
+# Rethink if this is both the correct way to do it and if this is even neccessary?
+def compute_throughdist(source, mid, target, graph, neg_edges, beta):
+    dist1 = b_hop_sssp(source,graph,neg_edges,beta)
+    dist2 = b_hop_stsp(target,graph,beta)
+    return dist1[mid]+dist2[mid]
+
+def find_betweenness_set(source, target, graph, neg_edges, beta):
+    dist1 = b_hop_sssp(source,graph,neg_edges,beta)
+    dist2 = b_hop_stsp(target,graph,beta)
+    between = set()
+    for x in graph.keys():
+        if dist1[x]+dist2[x] < 0:
+            between.add(x)
+    return between
+
+def betweenness(source, target, graph, neg_edges, beta):
+    return len(find_betweenness_set(source,target,graph,neg_edges,beta))
+
+def reweight_graph(graph, price_function):
+    # TODO: consider if it makes more sense to just hold the total set of edges for 
+    # exactly the purpose of reweighting the graph in O(m) time (assuming m is the
+    # number of edges in the graph), rather than the current O(n^2) time.
+    for u in graph.keys(): 
+        for v in graph[u].keys():
+            graph[u][v] = graph[u][v] + price_function[u] - price_function[v]
+    return graph

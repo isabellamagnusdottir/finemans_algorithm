@@ -8,13 +8,13 @@ TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
 # DEGREE OF ONE TESTS
 def test_ensure_degree_of_one_for_tree_with_neg_root():
     graph, _ = load_test_case(TESTDATA_FILEPATH + "tree_graph_two_layered_negative_root.json")
-    assert len(graph[1]) == 2
+    assert len(graph[0]) == 2
 
     graph = ensure_neg_vertices_has_degree_of_one(graph)
-    assert len(graph[1]) == 1
+    assert len(graph[0]) == 1
 
 def test_ensure_same_graph_on_graph_with_no_neg_edges():
-    graph, _ = load_test_case(TESTDATA_FILEPATH + "complete_four_vertices_graph_with_no_neg_edges.json")
+    graph, _ = load_test_case(TESTDATA_FILEPATH + "complete_4_vertices_graph_with_no_neg_edges.json")
     new_graph = ensure_neg_vertices_has_degree_of_one(graph)
 
     assert graph == new_graph
@@ -38,7 +38,7 @@ def test_max_degree_already_ensured(filename, threshold):
 
 
 def test_complete_graph_is_doubled():
-    graph, _ = load_test_case(TESTDATA_FILEPATH + "complete_four_vertices_graph_with_no_neg_edges.json")
+    graph, _ = load_test_case(TESTDATA_FILEPATH + "complete_4_vertices_graph_with_no_neg_edges.json")
     threshold = 2
     graph = ensure_max_degree(graph, threshold)
 
