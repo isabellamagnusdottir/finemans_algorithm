@@ -3,7 +3,7 @@ import pytest
 from fineman.helper_functions import *
 from utils.load_test_case import load_test_case
 
-TESTDATA_FILEPATH = "src/tests/test_data/"
+TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
 
 @pytest.mark.parametrize("filename", [
     "complete_four_vertices_graph_with_no_neg_edges.json",
