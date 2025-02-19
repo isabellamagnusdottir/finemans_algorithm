@@ -1,4 +1,3 @@
-from collections import defaultdict
 import numpy as np
 import random as rand
 from .helper_functions import b_hop_sssp, b_hop_stsp, super_source_bfd
@@ -24,19 +23,25 @@ def betweenness_reduction(graph: dict[int, dict[int, int]], vertices, pos_edges,
 
 
 def construct_h(graph: dict[int, dict[int, int]], T, distances):
-    h_graph = defaultdict(list)
-    h_neg_edges = {}
+    h_graph = {}
+    h_neg_edges = set()
 
-    # TODO: consider: does it require a double foor-loop?
+    # TODO: consider: does it require a double for-loop?
 
-    for t in T:
-        for v in graph:
-            h_graph[t].add((v,distances[t][1][v]))
-            if distances[t][1][v] < 0:
+    for v in graph.keys():
+        if v not in h_graph:
+            h_graph[v] = {}
+
+        for t in T:
+            if t not in h_graph:
+                h_graph[t] = {}
+
+            h_graph[t][v] = distances[t][0][v]
+            if distances[t][0][v] < 0:
                 h_neg_edges.add((t,v))
 
-            h_graph[v].add((t, distances[t][2][v]))
-            if distances[t][2][v] < 0:
+            h_graph[v][t] = distances[t][1][v]
+            if distances[t][1][v] < 0:
                 h_neg_edges.add((t,v))
     
     return h_graph, h_neg_edges
