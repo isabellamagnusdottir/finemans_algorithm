@@ -27,7 +27,7 @@ def bellman_ford(graph : dict[int, dict[int, int]], neg_edges: set, dist: list):
 
     old_dist = dist.copy()
     # TODO: consider it a dict from vertex to bool is better? depends on the ratio between neg_edges and all edges
-    used_hop_in_round = [False] * (len(graph.keys())+1)
+    used_hop_in_round = [False] * (len(graph.keys()))
 
     for (u,v) in neg_edges:
         alt_dist = dist[u] + graph[u][v]
@@ -48,7 +48,7 @@ def bfd(graph, neg_edges, dist: list, beta: int):
     return dist
 
 def b_hop_sssp(source, graph: dict[int, dict[int, int]], neg_edges: set, beta):
-    dist = [np.inf]*(len(graph.keys())+1)
+    dist = [np.inf]*(len(graph.keys()))
     dist[source] = 0
 
     return bfd(graph, neg_edges, dist, beta)
@@ -79,9 +79,9 @@ def transpose_graph(graph: dict[int, dict[int, int]]):
 # TODO: consider refactoring cycle detection
 def super_source_bfd(graph: dict[int, dict[int, int]], neg_edges: set, beta, cycleDetection = False):
 
-    super_source = len(graph)+1
+    super_source = len(graph)
     graph[super_source] = {}
-    for v in range(1, len(graph)):
+    for v in range(0, len(graph)-1):
         graph[super_source][v] = 0
 
     distances1 = b_hop_sssp(super_source, graph, neg_edges, beta)
