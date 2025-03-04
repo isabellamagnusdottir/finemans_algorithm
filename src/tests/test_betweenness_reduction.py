@@ -64,7 +64,6 @@ def test_construction_of_h_with_multiple_elements_in_T(filename, T, distances):
     assert all(len(dict) == len(graph.keys()) for v, dict in h_graph.items() if v in T)
     assert all(h_graph[t][v] == 0 for t in T for v in h_graph.keys())
 
-
 def test_betweenness_reduction_raises_val_error_when_constants_does_not_meet_requirements():
     c = 3
     depth = 1
