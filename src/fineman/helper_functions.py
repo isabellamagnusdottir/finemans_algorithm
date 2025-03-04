@@ -27,10 +27,11 @@ def dijkstra(graph: dict[int, dict[int, int]], neg_edges: set, dist: list, I_pri
 
 # hold styr på hvorvidt vægten, som står der nu, kommer fra den nuværende bellman-ford eller fra tidligere
 def bellman_ford(graph : dict[int, dict[int, int]], neg_edges: set, dist: list, I_prime = None, anc_in_I = None, parent = None, save_source = False):
-    
+
     old_dist = dist.copy()
     # TODO: consider it a dict from vertex to bool is better? depends on the ratio between neg_edges and all edges
     used_hop_in_round = [False] * (len(graph.keys()))
+
     for (u,v) in neg_edges:
         alt_dist = dist[u] + graph[u][v]
 
@@ -40,7 +41,7 @@ def bellman_ford(graph : dict[int, dict[int, int]], neg_edges: set, dist: list, 
         if alt_dist < dist[v]:
             dist[v] = alt_dist
             used_hop_in_round[v] = True
- 
+
             if save_source:
                 _compute_ancestor_parent(parent, anc_in_I, I_prime, u,v, len(graph))
 
@@ -64,7 +65,7 @@ def bfd_save_rounds(graph, neg_edges, dist: list, beta: int):
 def b_hop_sssp(source, graph: dict[int, dict[int, int]], neg_edges: set, beta, I_prime=None,parent=None,anc_in_I=None,save_source=False):
     dist = [np.inf]*(len(graph.keys()))
     dist[source] = 0
-    
+
     return bfd(graph, neg_edges, dist, beta, I_prime,parent,anc_in_I, save_source)
 
 def b_hop_stsp(target, graph: dict[int, dict[int, int]], beta):
@@ -97,7 +98,6 @@ def _subset_bfd(graph, neg_edges, subset, beta,I_prime=None,save_source=False):
     parent = [np.nan]*len(graph.keys()) if save_source else None
     anc_in_I = [np.nan]*len(graph.keys()) if save_source else None
 
-  
     for v in subset:
         graph[super_source][v] = 0
 
@@ -157,7 +157,7 @@ def betweenness(source, target, graph, neg_edges, beta):
 
 def reweight_graph(graph, price_function):
     neg_edges = set()
-    # TODO: consider if it makes more sense to just hold the total set of edges for 
+    # TODO: consider if it makes more sense to just hold the total set of edges for
     # exactly the purpose of reweighting the graph in O(m) time (assuming m is the
     # number of edges in the graph), rather than the current O(n^2) time.
     for u in graph.keys(): 
@@ -177,9 +177,25 @@ def compute_reach(graph,neg_edges,subset,h):
 def _compute_ancestor_parent(parent, anc_in_I, I_prime, u: int,v: int, super_source: int):
     if u == super_source:
         return
-    
+
     parent[v] = u
     if parent[v] in I_prime and v not in I_prime:
         anc_in_I[v] = parent[v]
     else:
         anc_in_I[v] = anc_in_I[parent[v]]
+
+
+
+def super_source_bfd_save_rounds(graph, neg_edges, subset, beta):
+    super_source = len(graph)
+    graph[super_source] = {}
+    for v in subset:
+        if v != super_source:
+            graph[super_source][v] = 0
+
+    dist = [np.inf] * (len(graph.keys()))
+    dist[super_source] = 0
+
+    dists = bfd_save_rounds(graph, neg_edges, dist, beta)
+    del graph[super_source]
+    return [lst[:-1] for lst in dists]
