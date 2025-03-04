@@ -1,7 +1,8 @@
 import numpy as np
 from queue import PriorityQueue
 
-def dijkstra(graph: dict[int, dict[int, int]], neg_edges: set, dist: list):
+def dijkstra(graph: dict[int, dict[int, int]], neg_edges: set, dist: list, I_prime = None, parent = None, anc_in_I=None, save_source = False):
+
     pq = PriorityQueue()
 
     for v in graph.keys():
@@ -19,16 +20,17 @@ def dijkstra(graph: dict[int, dict[int, int]], neg_edges: set, dist: list):
                 dist[v] = alt_dist
                 pq.put((alt_dist,v))
 
+                if save_source:
+                    _compute_ancestor_parent(parent, anc_in_I, I_prime, u,v, len(graph))
     return dist
 
 
 # hold styr på hvorvidt vægten, som står der nu, kommer fra den nuværende bellman-ford eller fra tidligere
-def bellman_ford(graph : dict[int, dict[int, int]], neg_edges: set, dist: list):
-
+def bellman_ford(graph : dict[int, dict[int, int]], neg_edges: set, dist: list, I_prime = None, anc_in_I = None, parent = None, save_source = False):
+    
     old_dist = dist.copy()
     # TODO: consider it a dict from vertex to bool is better? depends on the ratio between neg_edges and all edges
     used_hop_in_round = [False] * (len(graph.keys()))
-
     for (u,v) in neg_edges:
         alt_dist = dist[u] + graph[u][v]
 
@@ -38,20 +40,32 @@ def bellman_ford(graph : dict[int, dict[int, int]], neg_edges: set, dist: list):
         if alt_dist < dist[v]:
             dist[v] = alt_dist
             used_hop_in_round[v] = True
+ 
+            if save_source:
+                _compute_ancestor_parent(parent, anc_in_I, I_prime, u,v, len(graph))
+
     return dist
 
-def bfd(graph, neg_edges, dist: list, beta: int):
-    dist = dijkstra(graph, neg_edges, dist)
+def bfd(graph, neg_edges, dist: list, beta: int, I_prime = None,parent=None, anc_in_I=None,save_source = False):
+
+    dist = dijkstra(graph, neg_edges, dist, I_prime, parent, anc_in_I, save_source)
     for _ in range(beta):
-        dist = bellman_ford(graph, neg_edges, dist)
-        dist = dijkstra(graph, neg_edges, dist)
+        dist = bellman_ford(graph, neg_edges, dist, I_prime, parent, anc_in_I, save_source)
+        dist = dijkstra(graph, neg_edges, dist, I_prime, parent, anc_in_I, save_source)
     return dist
 
-def b_hop_sssp(source, graph: dict[int, dict[int, int]], neg_edges: set, beta):
+def bfd_save_rounds(graph, neg_edges, dist: list, beta: int):
+    rounds = [dijkstra(graph, neg_edges, dist)]
+    for i in range(beta):
+        dist = bellman_ford(graph,neg_edges,rounds[i])
+        rounds.append(dijkstra(graph,neg_edges,dist))
+    return rounds
+
+def b_hop_sssp(source, graph: dict[int, dict[int, int]], neg_edges: set, beta, I_prime=None,parent=None,anc_in_I=None,save_source=False):
     dist = [np.inf]*(len(graph.keys()))
     dist[source] = 0
-
-    return bfd(graph, neg_edges, dist, beta)
+    
+    return bfd(graph, neg_edges, dist, beta, I_prime,parent,anc_in_I, save_source)
 
 def b_hop_stsp(target, graph: dict[int, dict[int, int]], beta):
     t_graph, t_neg_edges = transpose_graph(graph)
@@ -76,17 +90,34 @@ def transpose_graph(graph: dict[int, dict[int, int]]):
 
     return t_graph, t_neg_edges
 
-# TODO: consider refactoring cycle detection
-def super_source_bfd(graph: dict[int, dict[int, int]], neg_edges: set, beta, cycleDetection = False):
 
+def _subset_bfd(graph, neg_edges, subset, beta,I_prime=None,save_source=False):
     super_source = len(graph)
     graph[super_source] = {}
-    for v in range(0, len(graph)-1):
+    parent = [np.nan]*len(graph.keys()) if save_source else None
+    anc_in_I = [np.nan]*len(graph.keys()) if save_source else None
+
+  
+    for v in subset:
         graph[super_source][v] = 0
 
-    distances1 = b_hop_sssp(super_source, graph, neg_edges, beta)
+    distances = b_hop_sssp(super_source, graph, neg_edges, beta,I_prime,parent,anc_in_I,save_source)
+    del graph[super_source]
+    if save_source:
+        for i in I_prime:
+            if distances[i] < 0 and anc_in_I[i] == i:
+                raise ValueError("Error -- negative cycle detected (!)")
+    return distances
+
+def subset_bfd(graph, neg_edges, subset, beta,I_prime=None,save_source=False):
+    return _subset_bfd(graph,neg_edges,subset,beta,I_prime,save_source)[:-1]
+
+# TODO: consider refactoring cycle detection
+def super_source_bfd(graph: dict[int, dict[int, int]], neg_edges: set, beta, cycleDetection = False):
+    distances1 = _subset_bfd(graph,neg_edges,graph.keys(),beta)
     if cycleDetection:
-        distances2 = bfd(graph, neg_edges, distances1.copy(), beta)
+        distances2 = bellman_ford(graph, neg_edges, distances1.copy(),None)
+        distances2 = dijkstra(graph, neg_edges, distances2,None)
         
         for v in graph.keys():
             if distances2[v] < distances1[v]:
@@ -132,7 +163,23 @@ def reweight_graph(graph, price_function):
     for u in graph.keys(): 
         for v in graph[u].keys():
             graph[u][v] = graph[u][v] + price_function[u] - price_function[v]
+
             if graph[u][v] < 0:
                 neg_edges.add((u,v))
 
     return graph, neg_edges
+
+def compute_reach(graph,neg_edges,subset,h):
+    d = subset_bfd(graph,neg_edges,subset,h)
+    return {v for v in graph.keys() if d[v] < 0}
+
+# TODO: Non-Functional - missing edge cases (and therefore likely some trivial cases)
+def _compute_ancestor_parent(parent, anc_in_I, I_prime, u: int,v: int, super_source: int):
+    if u == super_source:
+        return
+    
+    parent[v] = u
+    if parent[v] in I_prime and v not in I_prime:
+        anc_in_I[v] = parent[v]
+    else:
+        anc_in_I[v] = anc_in_I[parent[v]]
