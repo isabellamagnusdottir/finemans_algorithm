@@ -1,4 +1,6 @@
 from .double_tree_graph_generator import *
+from .bellman_ford import *
+from .synthetic_graph_generator import *
 
 
 # Essentially exposes everything that doesn't start with "_", since "_"
