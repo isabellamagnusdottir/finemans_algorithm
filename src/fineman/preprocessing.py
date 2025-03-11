@@ -1,6 +1,6 @@
 from math import ceil
 from collections import deque
-from .helper_functions import get_set_of_neg_vertices, transpose_graph
+from fineman.helper_functions import get_set_of_neg_vertices, transpose_graph
 
 SCALAR_FOR_THRESHOLD = 4
 
@@ -89,5 +89,5 @@ def preprocess_graph(graph: dict[int, dict[int, int]], n, m):
     transposed_graph, _ = transpose_graph(transformed_graph)
     final_transposed_graph = ensure_max_degree(transposed_graph, threshold)
     
-    return transpose_graph(final_transposed_graph)[0]
+    return transpose_graph(final_transposed_graph)
 
