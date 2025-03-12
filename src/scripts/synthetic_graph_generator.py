@@ -33,11 +33,11 @@ def graph_generator(graph_family: str, no_of_vertices: int, seed = None):
             return nx.relabel_nodes(graph, mapping)
 
         case "random":
-            return nx.gnp_random_graph(no_of_vertices, 0.66, seed = seed, directed=True)
+            return nx.gnm_random_graph(no_of_vertices, 3*no_of_vertices, seed=seed, directed=True)
 
 
-def get_weight(cap: int, weights, only_positives=True):
-    if rand.choices([True, False], weights) or only_positives:
+def get_weight(cap: int, weights, only_positives=False):
+    if rand.choices([True, False], weights)[0] or only_positives:
         return rand.randint(0, cap)
     return rand.randint(-cap, -1)
 
@@ -45,10 +45,12 @@ def get_weight(cap: int, weights, only_positives=True):
 def graph_to_json(graph: DiGraph, num, weights):
     graph_data = {}
 
-    for u,v in graph.edges.keys():
+    for u in range(num):
         if not str(u) in graph_data:
             graph_data[str(u)] = []
-        graph_data[str(u)].append([v, get_weight(num, weights)])
+        if u in graph.nodes:
+            for v in graph.neighbors(u):
+                graph_data[str(u)].append([v, get_weight(num, weights)])
 
     return graph_data
 
@@ -57,14 +59,14 @@ def save_graph_json(graph: DiGraph, num, weights, filename: str):
     json_data = graph_to_json(graph, num, weights)
     with open("../tests/test_data/synthetic_graphs/" + filename + ".json", 'w') as f:
         json_str = json.dumps(json_data, indent=2)
-        json_str = re.sub(r'\[\n\s*(\d+),\n\s*(\d+)\n\s*\]', r'[\1,\2]', json_str)
+        json_str = re.sub(r'\[\n\s*(\d+),\n\s*(-?\d+)\n\s*\]', r'[\1,\2]', json_str)
         f.write(json_str)
 
 
 def main():
-    lst = [10, 100]#, 1000]
+    lst = [10, 100, 1000]
     types_of_graphs = ["empty", "path", "cycle", "random_tree", "complete", "random"]
-    pos_neg_edges_ratio = [0.6,0.4]
+    pos_neg_edges_ratio = [0.66,0.34]
 
     for family in types_of_graphs:
         for num in lst:
@@ -72,7 +74,7 @@ def main():
             save_graph_json(graph, num, pos_neg_edges_ratio, f"{family}_{num}")
 
     # for GRIDS
-    lst = [3, 10]#, 30]
+    lst = [3, 10, 30]
     for num in lst:
         graph = graph_generator("grid", num, None)
         save_graph_json(graph, num, pos_neg_edges_ratio,f"grid_{num}_{num}")

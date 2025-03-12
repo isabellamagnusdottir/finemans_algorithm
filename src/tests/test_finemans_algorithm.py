@@ -1,12 +1,13 @@
 import pytest
 
-from fineman import reweight_graph
-from fineman.finemans_algorithm import fineman, _reverse_price_functions_on_distances
-from scripts import standard_bellman_ford
-from scripts.double_tree_graph_generator import generate_double_tree
-from utils import load_test_case, NegativeCycleError
+from src.fineman.helper_functions import reweight_graph
+from src.fineman.finemans_algorithm import fineman, _reverse_price_functions_on_distances
+from src.scripts import standard_bellman_ford
+from src.scripts.double_tree_graph_generator import generate_double_tree
+from src.utils import load_test_case, NegativeCycleError
 
 TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
+TESTDATA_FILEPATH_SYNTHETIC_GRAPHS = 'src/tests/test_data/synthetic_graphs/'
 
 @pytest.mark.parametrize("depth", [4,6,10,12])
 def test_itest(depth):
@@ -17,6 +18,32 @@ def test_itest(depth):
     actual = fineman(graph, 0)
 
     assert actual == expected
+
+
+@pytest.mark.parametrize("n,family", [
+    (100, "random"),
+    (1000, "random"),
+    (100, "complete"),
+    (1000, "complete"),
+    (100, "cycle"),
+    (1000, "cycle")
+])
+def test_lol(n, family):
+    graph, neg_edges = load_test_case(TESTDATA_FILEPATH_SYNTHETIC_GRAPHS + f"{family}_{n}.json")
+    expected = []
+    error_raised = False
+    try:
+        expected = standard_bellman_ford(graph, 0)
+
+    except NegativeCycleError:
+        error_raised = True
+        with pytest.raises(NegativeCycleError):
+            fineman(graph, 0)
+
+    if not error_raised:
+        actual = fineman(graph, 0)
+        assert actual == expected
+
 
 
 @pytest.mark.parametrize("price_function", [

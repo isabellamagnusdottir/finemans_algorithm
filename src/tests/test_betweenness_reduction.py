@@ -1,9 +1,9 @@
 import pytest
 
-from utils.load_test_case import load_test_case
-from fineman.helper_functions import betweenness, reweight_graph
-from fineman.betweenness_reduction import construct_h, betweenness_reduction
-from scripts import generate_double_tree
+from src.utils.load_test_case import load_test_case
+from src.fineman.helper_functions import betweenness, reweight_graph
+from src.fineman.betweenness_reduction import construct_h, betweenness_reduction
+from src.scripts import generate_double_tree
 
 TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
 

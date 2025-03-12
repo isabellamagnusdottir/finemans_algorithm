@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-from fineman.heavy_light_partition import *
-from utils.load_test_case import load_test_case
+from src.fineman.heavy_light_partition import *
+from src.utils.load_test_case import load_test_case
 
 TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
 

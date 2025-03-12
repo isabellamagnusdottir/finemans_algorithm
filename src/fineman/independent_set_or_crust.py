@@ -1,6 +1,6 @@
-from fineman.helper_functions import *
-from fineman.rand_is import *
-from fineman.heavy_light_partition import *
+from src.fineman.helper_functions import *
+from src.fineman.rand_is import *
+from src.fineman.heavy_light_partition import *
 import time
 import math
 import random as rand

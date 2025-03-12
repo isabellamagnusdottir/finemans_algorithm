@@ -1,15 +1,15 @@
 from math import ceil
 
-from fineman.betweenness_reduction import betweenness_reduction
-from fineman.elimination_by_hop_reduction import elimination_of_r_remote_edges_by_hop_reduction
-from fineman.helper_functions import reweight_graph, super_source_bfd, compute_reach, transpose_graph, b_hop_sssp, \
+from src.fineman.betweenness_reduction import betweenness_reduction
+from src.fineman.elimination_by_hop_reduction import elimination_of_r_remote_edges_by_hop_reduction
+from src.fineman.helper_functions import reweight_graph, super_source_bfd, compute_reach, transpose_graph, b_hop_sssp, \
     b_hop_stsp
-from fineman.independent_set_or_crust import find_is_or_crust
+from src.fineman.independent_set_or_crust import find_is_or_crust
 
 
 def _compute_price_function_to_eliminate_independent_set(graph, independent_set):
     out_I = {(u,v) for u in independent_set for v in graph[u].keys()}
-    graph_out_I, _ = _subgraph_with_out_set(graph, out_I)
+    graph_out_I, _ = _subgraph_with_out_subset(graph, out_I)
     return super_source_bfd(graph_out_I, out_I, 1)
 
 
@@ -68,7 +68,7 @@ def elimination_algorithm(org_graph, org_neg_edges):
                     print("Second half of negative sandwich found")
                     while len(U) > k**(1/3):
                         U.pop()
-                    phi_2 = _compute_price_functiom_to_make_U_r_remote(graph_phi1, neg_edges, (x,U,y), beta=r+1)
+                    phi_2 = _compute_price_function_to_make_U_r_remote(graph_phi1, neg_edges, (x,U,y), beta=r+1)
 
                     graph_phi1_phi2, neg_edges = reweight_graph(graph_phi1, phi_2)
 
@@ -76,7 +76,7 @@ def elimination_algorithm(org_graph, org_neg_edges):
                         return elimination_algorithm(org_graph, org_neg_edges)
 
                     out_U = {(u, v) for u in U for v in org_graph[u].keys()}
-                    graph_phi1_phi2_out_U, neg_edges = _subgraph_with_out_set(graph_phi1_phi2, out_U)
+                    graph_phi1_phi2_out_U, neg_edges = _subgraph_with_out_subset(graph_phi1_phi2, out_U)
                     phi = elimination_of_r_remote_edges_by_hop_reduction(graph_phi1_phi2_out_U, neg_edges, r)
 
                     return [phi, phi_1, phi_2]

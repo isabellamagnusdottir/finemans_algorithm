@@ -1,9 +1,5 @@
 from numpy import inf
-from utils.cycle_error import NegativeCycleError
-
-
-def main():
-    return standard_bellman_ford()
+from src.utils.cycle_error import NegativeCycleError
 
 def standard_bellman_ford(graph: dict[int, dict[int, int]], source: int):
     dist = [inf]*len(graph)
@@ -22,6 +18,3 @@ def standard_bellman_ford(graph: dict[int, dict[int, int]], source: int):
                 raise NegativeCycleError
             
     return dist
-
-if __name__ == "__main__":
-    main()

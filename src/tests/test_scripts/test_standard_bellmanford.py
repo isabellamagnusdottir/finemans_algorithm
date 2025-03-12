@@ -1,7 +1,7 @@
 import pytest
-from scripts.bellman_ford import standard_bellman_ford
-from utils.load_test_case import load_test_case
-from utils.cycle_error import NegativeCycleError
+from src.scripts.bellman_ford import standard_bellman_ford
+from src.utils.load_test_case import load_test_case
+from src.utils.cycle_error import NegativeCycleError
 from numpy import inf
 
 

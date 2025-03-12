@@ -1,7 +1,7 @@
 from typing import Set
 import random as rand
 import math
-from fineman.helper_functions import subset_bfd
+from src.fineman.helper_functions import subset_bfd
 
 def rand_is(graph,negative_edges, negative_subset, rho) -> Set[int]:
 

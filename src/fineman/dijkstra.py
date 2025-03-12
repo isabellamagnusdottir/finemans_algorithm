@@ -1,5 +1,6 @@
 from queue import PriorityQueue
 from numpy import inf
+from src.utils.cycle_error import NegativeCycleError
 
 def dijkstra(graph, source):
     dist = [inf] * (len(graph.keys()))
@@ -22,5 +23,9 @@ def dijkstra(graph, source):
                 dist[v] = alt_dist
                 pq.put((alt_dist, v))
                 #predecessor[v] = u
+
+    d = False
+    if d:
+        raise NegativeCycleError
 
     return dist #, predecessor

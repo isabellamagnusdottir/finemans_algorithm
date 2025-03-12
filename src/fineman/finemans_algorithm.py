@@ -1,9 +1,9 @@
 from math import log2
 
-from fineman import preprocess_graph
-from fineman.dijkstra import dijkstra
-from fineman.elimination_algorithm import elimination_algorithm
-from fineman.helper_functions import reweight_graph
+from src.fineman.preprocessing import preprocess_graph
+from src.fineman.dijkstra import dijkstra
+from src.fineman.elimination_algorithm import elimination_algorithm
+from src.fineman.helper_functions import reweight_graph
 
 
 def _reverse_price_functions_on_distances(source, dists, price_function):

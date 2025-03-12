@@ -1,6 +1,6 @@
 import pytest
-from fineman import find_is_or_crust
-from utils.load_test_case import load_test_case
+from src.fineman.independent_set_or_crust import find_is_or_crust
+from src.utils.load_test_case import load_test_case
 
 TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
 
