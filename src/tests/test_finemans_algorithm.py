@@ -50,10 +50,10 @@ def test_of_entire_algorithm_on_various_graph_families(ratio, no_of_vertices, fa
         assert actual == expected
         assert len(actual) == len(expected)
 
-@pytest.mark.parametrize("no_of_vertices", [3, 10, 30])
+@pytest.mark.parametrize("no_of_vertices", [6, 10, 30])
 @pytest.mark.parametrize("ratio", ["0_34", "0_5", "0_2", "0_1"])
 def test_of_entire_algorithm_on_grids(no_of_vertices, ratio):
-    graph, neg_edges = load_test_case(TESTDATA_FILEPATH + f"synthetic_graphs/grid_{no_of_vertices}_{no_of_vertices}_{ratio}.json")
+    graph, neg_edges = load_test_case(TESTDATA_FILEPATH + f"synthetic_graphs/grid_{no_of_vertices}x{no_of_vertices}_{ratio}.json")
     expected = []
     error_raised = False
     try:
