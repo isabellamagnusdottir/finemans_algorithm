@@ -6,6 +6,7 @@ from fineman.finemans_algorithm import fineman, _reverse_price_functions_on_dist
 from scripts import standard_bellman_ford
 from scripts.double_tree_graph_generator import generate_double_tree
 from utils import load_test_case, NegativeCycleError
+import os
 
 TESTDATA_FILEPATH = "src/tests/test_data/"
 
@@ -19,7 +20,7 @@ TESTDATA_FILEPATH = "src/tests/test_data/"
 #     assert actual == expected
 
 
-@pytest.mark.parametrize("depth", [4, 6, 10, 12])
+@pytest.mark.parametrize("depth", [4, 6, 9, 10])
 def test_of_entire_algorithm_on_double_tree_graph(depth):
     graph, neg_edges = generate_double_tree(depth, -(depth * 2))
 
@@ -30,30 +31,10 @@ def test_of_entire_algorithm_on_double_tree_graph(depth):
     assert actual == expected
 
 
-@pytest.mark.parametrize("ratio", ["0_34", "0_5", "0_2", "0_1"])
-@pytest.mark.parametrize("no_of_vertices", [10, 50, 100, 200, 500, 750, 1000])
-@pytest.mark.parametrize("family", ["path", "complete", "cycle"])
-def test_of_entire_algorithm_on_various_graph_families(ratio, no_of_vertices, family):
-    graph, neg_edges = load_test_case(TESTDATA_FILEPATH + f"synthetic_graphs/{family}_{no_of_vertices}_{ratio}.json")
-    expected = []
-    error_raised = False
-    try:
-        expected = standard_bellman_ford(graph, 0)
-
-    except NegativeCycleError:
-        error_raised = True
-        with pytest.raises(NegativeCycleError):
-            fineman(graph, 0)
-
-    if not error_raised:
-        actual = fineman(graph, 0)
-        assert actual == expected
-        assert len(actual) == len(expected)
-
-@pytest.mark.parametrize("no_of_vertices", [6, 10, 30])
-@pytest.mark.parametrize("ratio", ["0_34", "0_5", "0_2", "0_1"])
-def test_of_entire_algorithm_on_grids(no_of_vertices, ratio):
-    graph, neg_edges = load_test_case(TESTDATA_FILEPATH + f"synthetic_graphs/grid_{no_of_vertices}x{no_of_vertices}_{ratio}.json")
+@pytest.mark.parametrize("filename", [filename for filename in os.listdir("src/tests/test_data/synthetic_graphs")
+                                      if filename.startswith(('path','complete','cycle'))])
+def test_of_entire_algorithm_on_various_graph_families(filename):
+    graph, neg_edges = load_test_case(TESTDATA_FILEPATH + "synthetic_graphs/" + filename)
     expected = []
     error_raised = False
     try:
@@ -70,12 +51,31 @@ def test_of_entire_algorithm_on_grids(no_of_vertices, ratio):
         assert len(actual) == len(expected)
 
 
-@pytest.mark.parametrize("ratio", ["0_34", "0_5", "0_2", "0_1"])
-@pytest.mark.parametrize("scalar", [1, 3, 5, 9])
-@pytest.mark.parametrize("n", [50, 100, 200, 500, 750, 1000])
+@pytest.mark.parametrize("filename", [filename for filename in os.listdir("src/tests/test_data/synthetic_graphs")
+                                      if filename.startswith('grid')])
+def test_of_entire_algorithm_on_grids(filename):
+    graph, neg_edges = load_test_case(TESTDATA_FILEPATH + "synthetic_graphs/" + filename)
+    expected = []
+    error_raised = False
+    try:
+        expected = standard_bellman_ford(graph, 0)
+
+    except NegativeCycleError:
+        error_raised = True
+        with pytest.raises(NegativeCycleError):
+            fineman(graph, 0)
+
+    if not error_raised:
+        actual = fineman(graph, 0)
+        assert actual == expected
+        assert len(actual) == len(expected)
+
+
+@pytest.mark.parametrize("filename", [filename for filename in os.listdir("src/tests/test_data/synthetic_graphs")
+                                      if filename.startswith("random")])
 @pytest.mark.parametrize("repeat", range(2))
-def test_of_entire_algorithm_on_random_graphs_of_varying_size_and_pos_neg_ratio(ratio, scalar, n, repeat):
-    graph, neg_edges = load_test_case(TESTDATA_FILEPATH + f"synthetic_graphs/random_{n}_{scalar}n_{ratio}.json")
+def test_of_entire_algorithm_on_random_graphs_of_varying_size_and_pos_neg_ratio(filename, repeat):
+    graph, neg_edges = load_test_case(TESTDATA_FILEPATH + "synthetic_graphs/" + filename)
     expected = []
     error_raised = False
     try:

@@ -17,7 +17,7 @@ def graph_generator(graph_family: str, no_of_vertices: int, seed = None):
         case "cycle":
             return nx.cycle_graph(no_of_vertices, create_using=nx.DiGraph())
 
-        case "random_tree":
+        case "random-tree":
             tree = nx.random_labeled_tree(no_of_vertices, seed=seed)
             directed_tree = nx.DiGraph()
             directed_tree.add_edges_from(tree.edges)
@@ -43,7 +43,7 @@ def _get_weight(cap: int, weights, only_positives=False):
 def _graph_to_json(graph: DiGraph, num, weights):
     graph_data = {}
 
-    for u in range(num):
+    for u in range(len(graph.nodes)):
         if not str(u) in graph_data:
             graph_data[str(u)] = []
         if u in graph.nodes:
@@ -70,26 +70,29 @@ def _generate_random_graphs(seed = None):
         for scalar in edges_scalar:
             for ratio in ratios:
                 graph = nx.gnm_random_graph(num, scalar*num, seed=seed, directed=True)
-                save_graph_json(graph, num, ratio, f"random_{num}_{scalar}n_{str(ratio[1]).replace(".", "_")}")
+                filename = f"random_{num}_{scalar*num}_{str(ratio[1]).replace(".", "")}"
+                save_graph_json(graph, num, ratio, filename)
 
 
 def _generate_families_of_graphs(seed = None):
     no_of_vertices = [10, 50, 100, 200, 500, 750, 1000]
-    families_of_graphs = ["path", "cycle", "random_tree", "complete"]
+    families_of_graphs = ["path", "cycle", "random-tree", "complete"]
     ratios = [[0.66, 0.34], [0.5, 0.5], [0.8, 0.2], [0.9, 0.1]]
 
     for f in families_of_graphs:
         for v in no_of_vertices:
             for ratio in ratios:
                 graph = graph_generator(f, v, None)
-                save_graph_json(graph, v, ratio, f"{f}_{v}_{str(ratio[1]).replace(".", "_")}")
+                filename = f"{f}_{v}_{len(graph.edges)}_{str(ratio[1]).replace(".", "")}"
+                save_graph_json(graph, v, ratio, filename)
 
     # for GRIDS
-    no_of_vertices = [3, 10, 30]
+    no_of_vertices = [6, 10, 30]
     for num in no_of_vertices:
         for ratio in ratios:
             graph = graph_generator("grid", num, None)
-            save_graph_json(graph, num, ratio,f"grid_{num}_{num}_{str(ratio[1]).replace(".", "_")}")
+            filename = f"grid_{num}x{num}_{len(graph.edges)}_{str(ratio[1]).replace(".", "")}"
+            save_graph_json(graph, num, ratio,filename)
 
 def main():
     _generate_random_graphs()
