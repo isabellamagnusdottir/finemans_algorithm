@@ -61,7 +61,8 @@ def bfd(graph, neg_edges, dist: list, beta: int, I_prime = None,parent=None, anc
 def bfd_save_rounds(graph, neg_edges, dist: list, beta: int):
     rounds = [dijkstra(graph, neg_edges, dist)]
     for i in range(beta):
-        dist = bellman_ford(graph,neg_edges,rounds[i])
+        # TODO: find fix to avoid copying the rounds.
+        dist = bellman_ford(graph,neg_edges,rounds[i].copy())
         rounds.append(dijkstra(graph,neg_edges,dist))
     return rounds
 
@@ -157,19 +158,26 @@ def find_betweenness_set(source, target, graph, neg_edges, beta):
 def betweenness(source, target, graph, neg_edges, beta):
     return len(find_betweenness_set(source,target,graph,neg_edges,beta))
 
-def reweight_graph(graph, price_function):
-    neg_edges = set()
-    # TODO: consider if it makes more sense to just hold the total set of edges for
-    # exactly the purpose of reweighting the graph in O(m) time (assuming m is the
-    # number of edges in the graph), rather than the current O(n^2) time.
-    for u in graph.keys(): 
-        for v in graph[u].keys():
-            graph[u][v] = graph[u][v] + price_function[u] - price_function[v]
 
-            if graph[u][v] < 0:
-                neg_edges.add((u,v))
+def reweight_graph(graph, price_functions: list):
+    new_graph = {}
+    new_neg_edges = set()
+    negative_vertices = set()
 
-    return graph, neg_edges
+    for u, edges in graph.items():
+        if u not in new_graph:
+            new_graph[u] = {}
+        for v, w in edges.items():
+            new_graph[u][v] = w
+            for p in price_functions:
+                new_graph[u][v] += p[u]
+                new_graph[u][v] -= p[v]
+            if new_graph[u][v] < 0:
+                new_neg_edges.add((u,v))
+                negative_vertices.add(u)
+
+    return new_graph, new_neg_edges, negative_vertices
+
 
 def compute_reach(graph,neg_edges,subset,h):
     d = subset_bfd(graph,neg_edges,subset,h)

@@ -11,11 +11,14 @@ from fineman.elimination_algorithm import elimination_algorithm
 from fineman.helper_functions import reweight_graph
 
 
-def _reverse_price_functions_on_distances(source, dists, price_function):
+def _reverse_price_functions_on_distances(source, dists, price_functions):
     actual_dists = [0] * len(dists)
 
     for i in range(len(actual_dists)):
-        actual_dists[i] = dists[i] + price_function[i] - price_function[source]
+        actual_dists[i] = dists[i]
+
+        for p in price_functions:
+            actual_dists[i] += p[i] - p[source]
 
     return actual_dists
 
@@ -45,7 +48,6 @@ def _find_connected_component_to_source(graph, source: int):
 
     return new_graph, mapping
 
-
 def _remapping_distances(distances, n, mapping):
     dist = [inf] * n
 
@@ -55,38 +57,36 @@ def _remapping_distances(distances, n, mapping):
     return dist
 
 
-
 def fineman(graph: dict[int, dict[int, int]], source: int, seed = None):
 
     if seed is not None: rand.seed(seed)
 
-    # TODO: consider how to handle empty graphs
-    org_graph = graph.copy()
-    org_n = len(org_graph.keys())
-    m = sum(len(neighbors) for neighbors in org_graph.values())
+    org_n = len(graph.keys())
 
-    graph, mapping = _find_connected_component_to_source(graph, source)
-    org_connected_component = graph.copy()
+    graph, index_mapping = _find_connected_component_to_source(graph, source)
 
-
+    m = sum(len(neighbors) for neighbors in graph.values())
     graph, neg_edges = preprocess_graph(graph, org_n, m)
+
     n = len(graph.keys())
     neg_edges = {(u,v) for u, edges in graph.items() for v, w in edges.items() if w < 0}
 
-    composed_price_function = [0] * len(graph.keys())
+    all_price_functions = []
 
     for _ in range(int(log2(n))):
 
         k = len(neg_edges)
 
         for _ in range(int(k**(2/3))):
+            # TODO: consider if there is a better way to do this
             price_functions = elimination_algorithm(graph, neg_edges)
-            for p in price_functions:
-                graph, neg_edges = reweight_graph(org_connected_component, p)
-                composed_price_function = [x + y for x, y in zip(composed_price_function, p)]
+            all_price_functions = all_price_functions + price_functions
+
+            graph, neg_edges, _ = reweight_graph(graph, price_functions)
 
             if len(neg_edges) == 0: break
 
-    dist = dijkstra(graph, source)
+    distances = dijkstra(graph, index_mapping[source])
+    converted_distances = _reverse_price_functions_on_distances(index_mapping[source], distances, all_price_functions)
 
-    return _remapping_distances(_reverse_price_functions_on_distances(source, dist, composed_price_function), org_n, mapping)
+    return _remapping_distances(converted_distances, org_n, index_mapping)

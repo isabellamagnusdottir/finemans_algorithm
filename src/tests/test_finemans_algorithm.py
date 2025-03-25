@@ -67,7 +67,6 @@ def test_of_entire_algorithm_on_grids(filename):
         error_raised = True
         with pytest.raises(NegativeCycleError):
             fineman(graph, 0)
-            print("Oh no - a negative cycle is detected (!)")
 
     if not error_raised:
         actual = fineman(graph, 0)
@@ -106,7 +105,7 @@ def test_inverse_dist_array(price_function):
                  9: {}}
     org_dists = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
-    graph, neg_edges = reweight_graph(org_graph, price_function)
+    graph, neg_edges, _ = reweight_graph(org_graph, price_function)
 
     dists = standard_bellman_ford(graph, 0)
 

@@ -13,7 +13,6 @@ def betweenness_reduction(graph: dict[int, dict[int, int]], neg_edges, tau, beta
     sample_size = int(c*tau*ceil(log(n)))
     if sample_size > len(graph):
         sample_size = len(graph)
-        #raise ValueError
 
     T = rand.sample(tuple(graph.keys()), sample_size)
 
@@ -21,18 +20,16 @@ def betweenness_reduction(graph: dict[int, dict[int, int]], neg_edges, tau, beta
     for x in T:
         distances[x] = (b_hop_sssp(x, graph, neg_edges, beta), b_hop_stsp(x, graph, beta))
 
-    h_graph, h_neg_edges = construct_h(graph, T, distances)
+    h_graph, h_neg_edges = _construct_h(graph, T, distances)
     
     l = 2*sample_size
 
     return super_source_bfd(h_graph, h_neg_edges, l, cycleDetection=True)
 
 
-def construct_h(graph: dict[int, dict[int, int]], T, distances):
+def _construct_h(graph: dict[int, dict[int, int]], T, distances):
     h_graph = {}
     h_neg_edges = set()
-
-    # TODO: consider: does it require a double for-loop?
 
     for v in graph.keys():
         if v not in h_graph:
