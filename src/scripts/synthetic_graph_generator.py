@@ -30,6 +30,9 @@ def graph_generator(graph_family: str, no_of_vertices: int, seed = None):
         case "grid":
             return _generate_single_grid_graph(no_of_vertices)
 
+        case "watts-strogatz":
+            return nx.connected_watts_strogatz_graph(no_of_vertices)
+
 
 def _get_weight(cap: int, weights, only_positives=False):
     if rand.choices([True, False], weights)[0] or only_positives:
@@ -120,6 +123,22 @@ def _generate_single_grid_graph(size):
     return nx.relabel_nodes(grid, mapping)
 
 
+
+def _generate_connected_watts_strogatz_graph():
+    no_of_vertices = [10, 50, 100, 500, 1000]
+    neighbors = [2, 3, 4, 5]
+    probabilities = [0.05, 0.1, 0.25]
+    ratios = [[0.9, 0.1], [0.8, 0.2], [0.66, 0.34], [0.5, 0.5]]
+
+    for num in no_of_vertices:
+        for neighbor in neighbors:
+            for probability in probabilities:
+                for ratio in ratios:
+                    graph = nx.connected_watts_strogatz_graph(num, neighbor, probability, 10000)
+                    filename = f"watts-strogatz_{num}_{len(graph.edges)}_{str(ratio[1]).replace(".", "")}_{str(probability).replace(".", "")}"
+                    _save_graph_json(graph, num, ratio, filename)
+
+
 def _generate_grids():
     no_of_vertices = [6, 10, 30]
     ratios = [[0.9, 0.1], [0.8, 0.2], [0.66, 0.34], [0.5, 0.5], [0.2, 0.8]]
@@ -136,6 +155,7 @@ def main():
     _generate_random_graphs()
     _generate_families_of_graphs()
     _generate_grids()
+    _generate_connected_watts_strogatz_graph()
 
 if __name__ == "__main__":
     main()
