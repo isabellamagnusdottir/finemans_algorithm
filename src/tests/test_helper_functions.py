@@ -1,4 +1,3 @@
-import numpy as np
 import pytest
 
 from fineman.helper_functions import *
@@ -173,7 +172,7 @@ def test_super_source_bfd_cycle_detection_on_graphs_without_neg_cycles(filename,
 ])
 def test_super_source_bfd_cycle_detection_on_graphs_with_neg_cycles(filename, beta):
     graph, neg_edges = load_test_case(TESTDATA_FILEPATH + filename)
-    with pytest.raises(ValueError):
+    with pytest.raises(NegativeCycleError):
         super_source_bfd(graph, neg_edges, beta, cycleDetection=True)
 
 
@@ -384,26 +383,42 @@ def test_betweenness_set_grid_with_negative_edges(source,target,beta,expected):
     actual = find_betweenness_set(source,target,graph,neg_edges,beta)
     assert actual == expected
 
-@pytest.mark.parametrize("price_function,expected", [
-    ([2,2,2,2,2,2],
+@pytest.mark.parametrize("price_function,expected_graph", [
+    ([[2,2,2,2,2,2]],
      {0: {1: 1},1: {2: 1}, 2:{3: 1}, 3:{4: 1},4: {5: 1},5:{}}),
-    ([2,-2,2,-2,2,-2],
+    ([[2,-2,2,-2,2,-2]],
      {0: {1: 5},1: {2: -3}, 2:{3: 5}, 3:{4: -3},4: {5: 5},5:{}}),
-    ([-2,7,-9,0,6,3],
+    ([[-2,7,-9,0,6,3]],
      {0: {1: -8},1: {2: 17}, 2:{3: -8}, 3:{4: -5},4: {5: 4},5:{}}),
 ])
-def test_reweight_path_given_price_function(price_function, expected):
-    graph,_ = load_test_case(TESTDATA_FILEPATH+"path_with_only_positive_edges.json")
+def test_reweight_path_given_price_function(price_function, expected_graph):
+    graph,_ = load_test_case(TESTDATA_FILEPATH + "path_with_only_positive_edges.json")
 
-    assert reweight_graph(graph,price_function)[0] == expected
+    expected_neg_edges = {(u, v) for u, edges in expected_graph.items() for v, w in edges.items() if w < 0}
+    expected_neg_vertices = {u for u, _ in expected_neg_edges}
 
-@pytest.mark.parametrize("price_function,expected", [
-    ([-3,5,-7,-1],
-     {0: {1: -9},1: {2: 11}, 2:{3: -7}, 3:{0: 1}}),
+    actual_graph, actual_neg_edges, actual_neg_vertices = reweight_graph(graph, price_function)
+
+    assert actual_graph == expected_graph
+    assert actual_neg_edges == expected_neg_edges
+    assert actual_neg_vertices == expected_neg_vertices
+
+@pytest.mark.parametrize("price_function,expected_graph", [
+    ([[-3,5,-7,-1]],
+     {0: {1: -9},1: {2: 11}, 2:{3: -7}, 3:{0: 1}},
+    ),
 ])
-def test_reweight_cycle_given_price_function(price_function, expected):
-    graph,_ = load_test_case(TESTDATA_FILEPATH+"negative_cycle_4.json")
-    assert reweight_graph(graph,price_function)[0] == expected
+def test_reweight_cycle_given_price_function(price_function, expected_graph):
+    graph,_ = load_test_case(TESTDATA_FILEPATH + "negative_cycle_4.json")
+
+    expected_neg_edges = {(u,v) for u, edges in expected_graph.items() for v, w in edges.items() if w < 0}
+    expected_neg_vertices = {u for u,_ in expected_neg_edges}
+
+    actual_graph, actual_neg_edges, actual_neg_vertices = reweight_graph(graph, price_function)
+
+    assert actual_graph == expected_graph
+    assert actual_neg_edges == expected_neg_edges
+    assert actual_neg_vertices == expected_neg_vertices
 
 
 @pytest.mark.parametrize("subset,expected", [
@@ -513,7 +528,7 @@ def test_independent_set_negative_cycle_with_insufficient_hops(subset, expected)
 ])
 def test_independent_set_negative_cycle_detected(subset):
     graph,neg_edges = load_test_case(TESTDATA_FILEPATH+"small_alternating_cycle.json")
-    with pytest.raises(ValueError):
+    with pytest.raises(NegativeCycleError):
         subset_bfd(graph,neg_edges,subset,1,subset,True)
 
 @pytest.mark.parametrize("subset,expected", [
@@ -529,5 +544,5 @@ def test_independent_set_negative_cycle_not_detected(subset,expected):
 ])
 def test_independent_set_negative_cycle_not_detected_small(subset):
     graph,neg_edges = load_test_case(TESTDATA_FILEPATH+"independent_set_cycle_2.json")
-    with pytest.raises(ValueError):
+    with pytest.raises(NegativeCycleError):
         subset_bfd(graph,neg_edges,subset,1,subset,True)
