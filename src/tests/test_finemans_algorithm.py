@@ -12,15 +12,6 @@ TESTDATA_FILEPATH = "src/tests/test_data/"
 
 # TODO: mock test for negative sandwich
 
-# def test_of_entire_algorithm_on_empty_graph():
-#     graph, _ = load_test_case(TESTDATA_FILEPATH + "synthetic_graphs/empty_100.json")
-#
-#     expected = standard_bellman_ford(graph, 0)
-#
-#     actual = fineman(graph, 0)
-#
-#     assert actual == expected
-
 
 @pytest.mark.parametrize("depth", [3, 4, 6, 9])
 @pytest.mark.parametrize("repeat", range(2))
