@@ -151,25 +151,35 @@ def betweenness(source, target, graph, neg_edges, beta):
     return len(find_betweenness_set(source,target,graph,neg_edges,beta))
 
 
-def reweight_graph(graph, price_functions: list):
+def reweight_graph_and_composes_price_functions(graph: dict[int, dict[int, int]], new_price_function: list[int], existing: list[int]):
+    """
+    Reweights the given graph with the provided new_price_function, and composes the new_price_function with existing
+    precomputed price functions.
+
+    :param graph: the initial graphs, which needs to be reweighted (dict[int, dict[int, int]])
+    :param new_price_function: the price function which reweights the graph (list[int])
+    :param existing: the composed price function of previously computed price functions (list[int])
+
+    :return: the graph reweighted in new_price_function, a set of the negative edges, a set of the negative vertices,
+    and the composed price function.
+    """
+
     new_graph = {}
     new_neg_edges = set()
     negative_vertices = set()
 
     for u, edges in graph.items():
+        existing[u] += new_price_function[u]
+
         if u not in new_graph:
             new_graph[u] = {}
         for v, w in edges.items():
-            new_graph[u][v] = w
-            for p in price_functions:
-                new_graph[u][v] += p[u]
-                new_graph[u][v] -= p[v]
+            new_graph[u][v] = w + new_price_function[u] - new_price_function[v]
             if new_graph[u][v] < 0:
-                new_neg_edges.add((u,v))
+                new_neg_edges.add((u, v))
                 negative_vertices.add(u)
 
-    return new_graph, new_neg_edges, negative_vertices
-
+    return new_graph, new_neg_edges, negative_vertices, existing
 
 def compute_reach(graph,neg_edges,subset,h):
     d = subset_bfd(graph,neg_edges,subset,h)

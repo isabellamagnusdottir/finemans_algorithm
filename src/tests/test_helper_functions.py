@@ -302,11 +302,11 @@ def test_betweenness_set_grid_with_negative_edges(source,target,beta,expected):
     assert actual == expected
 
 @pytest.mark.parametrize("price_function,expected_graph", [
-    ([[2,2,2,2,2,2]],
+    ([2,2,2,2,2,2],
      {0: {1: 1},1: {2: 1}, 2:{3: 1}, 3:{4: 1},4: {5: 1},5:{}}),
-    ([[2,-2,2,-2,2,-2]],
+    ([2,-2,2,-2,2,-2],
      {0: {1: 5},1: {2: -3}, 2:{3: 5}, 3:{4: -3},4: {5: 5},5:{}}),
-    ([[-2,7,-9,0,6,3]],
+    ([-2,7,-9,0,6,3],
      {0: {1: -8},1: {2: 17}, 2:{3: -8}, 3:{4: -5},4: {5: 4},5:{}}),
 ])
 def test_reweight_path_given_price_function(price_function, expected_graph):
@@ -315,14 +315,15 @@ def test_reweight_path_given_price_function(price_function, expected_graph):
     expected_neg_edges = {(u, v) for u, edges in expected_graph.items() for v, w in edges.items() if w < 0}
     expected_neg_vertices = {u for u, _ in expected_neg_edges}
 
-    actual_graph, actual_neg_edges, actual_neg_vertices = reweight_graph(graph, price_function)
+    actual_graph, actual_neg_edges, actual_neg_vertices, actual_price_function = reweight_graph_and_composes_price_functions(graph, price_function, [0] * len(graph))
 
     assert actual_graph == expected_graph
     assert actual_neg_edges == expected_neg_edges
     assert actual_neg_vertices == expected_neg_vertices
+    assert actual_price_function == price_function
 
 @pytest.mark.parametrize("price_function,expected_graph", [
-    ([[-3,5,-7,-1]],
+    ([-3,5,-7,-1],
      {0: {1: -9},1: {2: 11}, 2:{3: -7}, 3:{0: 1}},
     ),
 ])
@@ -332,11 +333,12 @@ def test_reweight_cycle_given_price_function(price_function, expected_graph):
     expected_neg_edges = {(u,v) for u, edges in expected_graph.items() for v, w in edges.items() if w < 0}
     expected_neg_vertices = {u for u,_ in expected_neg_edges}
 
-    actual_graph, actual_neg_edges, actual_neg_vertices = reweight_graph(graph, price_function)
+    actual_graph, actual_neg_edges, actual_neg_vertices, actual_price_function = reweight_graph_and_composes_price_functions(graph, price_function, [0] * len(graph))
 
     assert actual_graph == expected_graph
     assert actual_neg_edges == expected_neg_edges
     assert actual_neg_vertices == expected_neg_vertices
+    assert actual_price_function == price_function
 
 
 @pytest.mark.parametrize("subset,expected", [

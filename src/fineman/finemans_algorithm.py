@@ -1,24 +1,20 @@
+import random as rand
 from collections import deque
 from math import log2
-import random as rand
-from numpy import inf
 
 from bidict import bidict
+from numpy import inf
 
 from fineman import preprocess_graph
 from fineman.dijkstra import dijkstra
 from fineman.elimination_algorithm import elimination_algorithm
-from fineman.helper_functions import reweight_graph
 
 
-def _reverse_price_functions_on_distances(source, dists, price_functions):
-    actual_dists = [0] * len(dists)
+def _compute_original_distances(source, reweighted_distances, composed_price_function):
+    actual_dists = [0] * len(reweighted_distances)
 
     for i in range(len(actual_dists)):
-        actual_dists[i] = dists[i]
-
-        for p in price_functions:
-            actual_dists[i] += p[i] - p[source]
+        actual_dists[i] = reweighted_distances[i] + composed_price_function[i] - composed_price_function[source]
 
     return actual_dists
 
@@ -71,22 +67,21 @@ def fineman(graph: dict[int, dict[int, int]], source: int, seed = None):
     n = len(graph.keys())
     neg_edges = {(u,v) for u, edges in graph.items() for v, w in edges.items() if w < 0}
 
-    all_price_functions = []
+    all_price_functions = [0] * len(graph)
 
     for _ in range(int(log2(n))):
 
         k = len(neg_edges)
 
         for _ in range(int(k**(2/3))):
-            # TODO: consider if there is a better way to do this
-            price_functions = elimination_algorithm(graph, neg_edges)
-            all_price_functions = all_price_functions + price_functions
+            graph, neg_edges, _, price_function = elimination_algorithm(graph, neg_edges)
 
-            graph, neg_edges, _ = reweight_graph(graph, price_functions)
+            for idx in range(len(price_function)):
+                all_price_functions[idx] += price_function[idx]
 
             if len(neg_edges) == 0: break
 
     distances = dijkstra(graph, index_mapping[source])
-    converted_distances = _reverse_price_functions_on_distances(index_mapping[source], distances, all_price_functions)
+    converted_distances = _compute_original_distances(index_mapping[source], distances, all_price_functions)
 
     return _remapping_distances(converted_distances, org_n, index_mapping)
