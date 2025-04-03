@@ -2,8 +2,8 @@ from math import ceil
 
 from fineman.betweenness_reduction import betweenness_reduction
 from fineman.elimination_by_hop_reduction import elimination_of_r_remote_edges_by_hop_reduction
-from fineman.helper_functions import reweight_graph, super_source_bfd, compute_reach, transpose_graph, b_hop_sssp, \
-    b_hop_stsp
+from fineman.helper_functions import super_source_bfd, compute_reach, transpose_graph, b_hop_sssp, \
+    b_hop_stsp, reweight_graph_and_composes_price_functions
 from fineman.independent_set_or_crust import find_is_or_crust
 
 
@@ -44,7 +44,7 @@ def _subgraph_of_pos_edges_and_out_set(graph: dict[int, dict[int, int]], out_set
 
 
 def elimination_algorithm(org_graph, org_neg_edges, seed = None):
-    price_functions = []
+    composed_price_function = [0] * len(org_graph)
     n = len(org_graph.keys())
 
     c = 3
@@ -52,10 +52,9 @@ def elimination_algorithm(org_graph, org_neg_edges, seed = None):
     r = ceil(k**(1/9))
 
     phi_1 = betweenness_reduction(org_graph, org_neg_edges, tau=r, beta=r+1, c=c)
-    price_functions.append(phi_1)
-    graph_phi1, neg_edges, U_0 = reweight_graph(org_graph, [phi_1])
+    graph_phi1, neg_edges, U_0, composed_price_function = reweight_graph_and_composes_price_functions(org_graph, phi_1, composed_price_function)
 
-    if len(neg_edges) == 0: return price_functions
+    if len(neg_edges) == 0: return graph_phi1, neg_edges, U_0, composed_price_function
 
     match find_is_or_crust(graph_phi1, neg_edges, U_0, c, c+1):
         case (y,U_1):
@@ -67,9 +66,8 @@ def elimination_algorithm(org_graph, org_neg_edges, seed = None):
                     while len(U_2) > k**(1/3):
                         U_2.pop()
                     phi_2 = _compute_price_function_to_make_U_r_remote(graph_phi1, neg_edges, (x,U_2,y), beta=r+1)
-                    price_functions.append(phi_2)
 
-                    graph_phi1_phi2, neg_edges, _ = reweight_graph(graph_phi1, [phi_2])
+                    graph_phi1_phi2, neg_edges, _, composed_price_function = reweight_graph_and_composes_price_functions(graph_phi1, phi_2, composed_price_function)
 
                     if len(compute_reach(graph_phi1_phi2, neg_edges, U_2, r)) > n / r:
                         return elimination_algorithm(org_graph, org_neg_edges)
@@ -77,15 +75,14 @@ def elimination_algorithm(org_graph, org_neg_edges, seed = None):
                     out_U_2 = {(u, v) for u in U_2 for v in org_graph[u].keys()}
                     graph_phi1_phi2_out_U_2, neg_edges = _subgraph_of_pos_edges_and_out_set(graph_phi1_phi2, out_U_2)
                     phi = elimination_of_r_remote_edges_by_hop_reduction(graph_phi1_phi2_out_U_2, neg_edges, r)
-                    price_functions.append(phi)
 
-                    return price_functions
+                    return reweight_graph_and_composes_price_functions(graph_phi1_phi2, phi, composed_price_function)
 
                 case I:
-                    price_functions.append(_compute_price_function_to_eliminate_independent_set(graph_phi1, I))
-                    return price_functions
+                    phi = _compute_price_function_to_eliminate_independent_set(graph_phi1, I)
+                    return reweight_graph_and_composes_price_functions(graph_phi1, phi, composed_price_function)
 
 
         case I:
-            price_functions.append(_compute_price_function_to_eliminate_independent_set(graph_phi1, I))
-            return price_functions
+            phi = _compute_price_function_to_eliminate_independent_set(graph_phi1, I)
+            return reweight_graph_and_composes_price_functions(graph_phi1, phi, composed_price_function)

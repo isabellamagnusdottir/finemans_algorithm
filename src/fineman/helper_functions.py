@@ -28,22 +28,20 @@ def dijkstra(graph: dict[int, dict[int, int]], neg_edges: set, dist: list, I_pri
     return dist
 
 
-# hold styr på hvorvidt vægten, som står der nu, kommer fra den nuværende bellman-ford eller fra tidligere
 def bellman_ford(graph : dict[int, dict[int, int]], neg_edges: set, dist: list, I_prime = None, anc_in_I = None, parent = None, save_source = False):
 
     old_dist = dist.copy()
-    # TODO: consider it a dict from vertex to bool is better? depends on the ratio between neg_edges and all edges
-    used_hop_in_round = [False] * (len(graph.keys()))
+    used_hop_in_round = set()
 
     for (u,v) in neg_edges:
         alt_dist = dist[u] + graph[u][v]
 
-        if used_hop_in_round[u]:
+        if u in used_hop_in_round:
             alt_dist = old_dist[u] + graph[u][v]
 
         if alt_dist < dist[v]:
             dist[v] = alt_dist
-            used_hop_in_round[v] = True
+            used_hop_in_round.add(v)
 
             if save_source:
                 _compute_ancestor_parent(parent, anc_in_I, I_prime, u,v, len(graph))
@@ -67,7 +65,7 @@ def bfd_save_rounds(graph, neg_edges, dist: list, beta: int):
     return rounds
 
 def b_hop_sssp(source, graph: dict[int, dict[int, int]], neg_edges: set, beta, I_prime=None,parent=None,anc_in_I=None,save_source=False):
-    dist = [np.inf]*(len(graph.keys()))
+    dist = [np.inf] * (len(graph.keys()))
     dist[source] = 0
 
     return bfd(graph, neg_edges, dist, beta, I_prime,parent,anc_in_I, save_source)
@@ -116,7 +114,7 @@ def _subset_bfd(graph, neg_edges, subset, beta,I_prime=None,save_source=False):
 def subset_bfd(graph, neg_edges, subset, beta: int, I_prime=None, save_source=False):
     return _subset_bfd(graph,neg_edges,subset,beta,I_prime,save_source)[:-1]
 
-# TODO: consider refactoring cycle detection
+
 def super_source_bfd(graph: dict[int, dict[int, int]], neg_edges: set, beta, cycleDetection = False):
     distances1 = _subset_bfd(graph,neg_edges,graph.keys(),beta)
     if cycleDetection:
@@ -139,12 +137,6 @@ def get_set_of_neg_vertices(graph: dict[int, dict[int, int]]):
     
     return neg_vertices
 
-# TODO: Find better name for mid
-# Rethink if this is both the correct way to do it and if this is even neccessary?
-def compute_throughdist(source, mid, target, graph, neg_edges, beta):
-    dist1 = b_hop_sssp(source,graph,neg_edges,beta)
-    dist2 = b_hop_stsp(target,graph,beta)
-    return dist1[mid]+dist2[mid]
 
 def find_betweenness_set(source, target, graph, neg_edges, beta):
     dist1 = b_hop_sssp(source,graph,neg_edges,beta)
@@ -159,25 +151,35 @@ def betweenness(source, target, graph, neg_edges, beta):
     return len(find_betweenness_set(source,target,graph,neg_edges,beta))
 
 
-def reweight_graph(graph, price_functions: list):
+def reweight_graph_and_composes_price_functions(graph: dict[int, dict[int, int]], new_price_function: list[int], existing: list[int]):
+    """
+    Reweights the given graph with the provided new_price_function, and composes the new_price_function with existing
+    precomputed price functions.
+
+    :param graph: the initial graphs, which needs to be reweighted (dict[int, dict[int, int]])
+    :param new_price_function: the price function which reweights the graph (list[int])
+    :param existing: the composed price function of previously computed price functions (list[int])
+
+    :return: the graph reweighted in new_price_function, a set of the negative edges, a set of the negative vertices,
+    and the composed price function.
+    """
+
     new_graph = {}
     new_neg_edges = set()
     negative_vertices = set()
 
     for u, edges in graph.items():
+        existing[u] += new_price_function[u]
+
         if u not in new_graph:
             new_graph[u] = {}
         for v, w in edges.items():
-            new_graph[u][v] = w
-            for p in price_functions:
-                new_graph[u][v] += p[u]
-                new_graph[u][v] -= p[v]
+            new_graph[u][v] = w + new_price_function[u] - new_price_function[v]
             if new_graph[u][v] < 0:
-                new_neg_edges.add((u,v))
+                new_neg_edges.add((u, v))
                 negative_vertices.add(u)
 
-    return new_graph, new_neg_edges, negative_vertices
-
+    return new_graph, new_neg_edges, negative_vertices, existing
 
 def compute_reach(graph,neg_edges,subset,h):
     d = subset_bfd(graph,neg_edges,subset,h)
