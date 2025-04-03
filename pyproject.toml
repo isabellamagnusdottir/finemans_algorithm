@@ -2,7 +2,8 @@
 name = "fineman-algorithm"
 version = "0.1.0"
 description = ""
-authors = ["Jakob <73228675+Kobo-coder@users.noreply.github.com>"]
+authors = ["Jakob <73228675+Kobo-coder@users.noreply.github.com>",
+           "Isabella <90042116+isabellamagnusdottir@users.noreply.github.com>"]
 license = "MIT License"
 readme = "README.md"
 packages = [{include = "src"}]
