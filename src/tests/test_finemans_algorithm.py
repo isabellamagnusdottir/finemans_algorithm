@@ -2,12 +2,12 @@ import os
 
 import pytest
 
-from fineman import reweight_graph_and_composes_price_functions
-from fineman.finemans_algorithm import fineman, _compute_original_distances, \
+from src.fineman import reweight_graph_and_composes_price_functions
+from src.fineman.finemans_algorithm import fineman, _compute_original_distances, \
     _find_connected_component_to_source
-from scripts import standard_bellman_ford
-from scripts.double_tree_graph_generator import generate_double_tree
-from utils import load_test_case, NegativeCycleError
+from src.scripts import standard_bellman_ford
+from src.scripts.double_tree_graph_generator import generate_double_tree
+from src.utils import load_test_case, NegativeCycleError
 
 TESTDATA_FILEPATH = "src/tests/test_data/"
 

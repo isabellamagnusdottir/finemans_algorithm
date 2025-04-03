@@ -1,7 +1,7 @@
 import pytest
 
-from fineman.helper_functions import *
-from utils.load_test_case import load_test_case
+from src.fineman.helper_functions import *
+from src.utils.load_test_case import load_test_case
 
 TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
 

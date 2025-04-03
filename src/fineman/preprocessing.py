@@ -1,7 +1,7 @@
 from math import ceil
 from collections import deque
-from fineman.helper_functions import get_set_of_neg_vertices, transpose_graph
-from utils.threshold_error import InvalidThresholdError
+from src.fineman.helper_functions import get_set_of_neg_vertices, transpose_graph
+from src.utils.threshold_error import InvalidThresholdError
 
 SCALAR_FOR_THRESHOLD = 4
 

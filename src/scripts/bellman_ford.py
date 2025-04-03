@@ -1,6 +1,6 @@
 from numpy import inf
 
-from utils.cycle_error import NegativeCycleError
+from src.utils.cycle_error import NegativeCycleError
 
 
 def standard_bellman_ford(graph: dict[int, dict[int, int]], source: int):

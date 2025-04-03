@@ -1,10 +1,10 @@
 import pytest
 
-from fineman import reweight_graph_and_composes_price_functions
-from fineman.betweenness_reduction import _construct_h, betweenness_reduction
-from fineman.helper_functions import betweenness
-from scripts import generate_double_tree
-from utils.load_test_case import load_test_case
+from src.fineman import reweight_graph_and_composes_price_functions
+from src.fineman.betweenness_reduction import _construct_h, betweenness_reduction
+from src.fineman.helper_functions import betweenness
+from src.scripts import generate_double_tree
+from src.utils.load_test_case import load_test_case
 
 TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
 

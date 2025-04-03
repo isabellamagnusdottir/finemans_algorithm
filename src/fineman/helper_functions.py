@@ -1,7 +1,7 @@
 import numpy as np
 from queue import PriorityQueue
 
-from utils import NegativeCycleError
+from src.utils import NegativeCycleError
 
 
 def dijkstra(graph: dict[int, dict[int, int]], neg_edges: set, dist: list, I_prime = None, parent = None, anc_in_I=None, save_source = False):
