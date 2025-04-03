@@ -6,13 +6,13 @@ import networkx as nx
 from networkx.classes import DiGraph
 
 
-def _get_weight(cap: int, weights, only_positives=False):
-    if rand.choices([True, False], weights)[0] or only_positives:
-        return rand.randint(0, cap)
-    return rand.randint(-cap, -1)
+def _get_weight(weights):
+    if rand.choices([True, False], weights)[0]:
+        return rand.randint(0, 30)
+    return rand.randint(-10, -1)
 
 
-def _graph_to_json(graph: DiGraph, num, weights):
+def _graph_to_json(graph: DiGraph, weights):
     graph_data = {}
 
     for u in range(len(graph.nodes)):
@@ -20,13 +20,13 @@ def _graph_to_json(graph: DiGraph, num, weights):
             graph_data[str(u)] = []
         if u in graph.nodes:
             for v in graph.neighbors(u):
-                graph_data[str(u)].append([v, _get_weight(num, weights)])
+                graph_data[str(u)].append([v, _get_weight(weights)])
 
     return graph_data
 
 
-def _save_graph_json(graph: DiGraph, num, weights, filename: str):
-    json_data = _graph_to_json(graph, num, weights)
+def _save_graph_json(graph: DiGraph, weights, filename: str):
+    json_data = _graph_to_json(graph, weights)
     with open("src/tests/test_data/synthetic_graphs/" + filename + ".json", 'w') as f:
         json_str = json.dumps(json_data, indent=2)
         json_str = re.sub(r'\[\n\s*(\d+),\n\s*(-?\d+)\n\s*\]', r'[\1,\2]', json_str)
@@ -110,7 +110,7 @@ def single_graph_generator(graph_family: str, no_of_vertices: int, ratio: tuple[
     if not filename:
         filename = f"{graph_family}_{no_of_vertices}_{len(graph.edges)}_{str(ratio[1]).replace(".", "")}"
 
-    _save_graph_json(graph, no_of_vertices, ratio, filename)
+    _save_graph_json(graph, ratio, filename)
 
 
 def generate_multiple_graphs(family: str, no_of_vertices, ratios):
@@ -148,10 +148,12 @@ def main():
 
     # RANDOM GRAPHS
     edges_scalar = [3, 5, 6, 9]
+    ratios = [(1.0,0.0), (0.98, 0.02), (0.95, 0.05), (0.92, 0.08), (0.9,0.1), (0.8, 0.2), (0.5, 0.5), (0.2, 0.8), (0.0, 1.0)]
     generate_multiple_random_graphs(no_of_vertices, ratios, edges_scalar)
 
     # GRIDS
     no_of_vertices = [6, 10, 30]
+    ratios = [(1.0, 0.0), (0.95, 0.05), (0.9, 0.1), (0.8, 0.2), (0.66, 0.34), (0.5, 0.5), (0.2, 0.8), (0.0, 1.0)]
     generate_multiple_grids(no_of_vertices, ratios)
 
     # WATTS-STOGATZ GRAPHS
