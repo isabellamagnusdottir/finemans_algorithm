@@ -176,5 +176,9 @@ cython_debug/
 notes/*
 
 src/tests/test_data/synthetic_graphs/*
+empiric_data/*
+plots/*
+
+poetry.lock
 
 .DS_Store

@@ -21,16 +21,21 @@ jobs:
         with:
           python-version: "3.13"
 
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
       - name: Install Dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          make clean
+          make install
 
       - name: Generating synthetic graphs
         run: |
           mkdir -p src/tests/test_data/synthetic_graphs
-          python src/scripts/synthetic_graph_generator.py
+          make generate-graphs
 
       - name: Run Tests
         run: |
-          pytest
+          make test

@@ -1,10 +1,10 @@
 from math import ceil
 
-from fineman.betweenness_reduction import betweenness_reduction
-from fineman.elimination_by_hop_reduction import elimination_of_r_remote_edges_by_hop_reduction
-from fineman.helper_functions import super_source_bfd, compute_reach, transpose_graph, b_hop_sssp, \
+from src.fineman.betweenness_reduction import betweenness_reduction
+from src.fineman.elimination_by_hop_reduction import elimination_of_r_remote_edges_by_hop_reduction
+from src.fineman.helper_functions import super_source_bfd, compute_reach, transpose_graph, b_hop_sssp, \
     b_hop_stsp, reweight_graph_and_composes_price_functions
-from fineman.independent_set_or_crust import find_is_or_crust
+from src.fineman.independent_set_or_crust import find_is_or_crust
 
 
 def _compute_price_function_to_eliminate_independent_set(graph, independent_set):

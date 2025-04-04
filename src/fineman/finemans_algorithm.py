@@ -5,9 +5,9 @@ from math import log2
 from bidict import bidict
 from numpy import inf
 
-from fineman import preprocess_graph
-from fineman.dijkstra import dijkstra
-from fineman.elimination_algorithm import elimination_algorithm
+from src.fineman import preprocess_graph
+from src.fineman.dijkstra import dijkstra
+from src.fineman.elimination_algorithm import elimination_algorithm
 
 
 def _compute_original_distances(source, reweighted_distances, composed_price_function):

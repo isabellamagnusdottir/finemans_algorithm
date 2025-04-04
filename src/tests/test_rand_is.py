@@ -1,6 +1,6 @@
 import pytest
-from fineman import rand_is
-from utils.load_test_case import load_test_case
+from src.fineman import rand_is
+from src.utils.load_test_case import load_test_case
 
 TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
 
