@@ -7,8 +7,8 @@ from src.scripts.bellman_ford import *
 from src.utils.cycle_error import NegativeCycleError
 from src.utils import load_test_case
 from src.scripts.synthetic_graph_generator import single_graph_generator
-from src.scripts.random_graph_no_neg_cycles_gen import random_graph_no_neg_cycles_generator,\
-    generate_random_neg_cycleless_graph
+from src.scripts.random_graph_no_neg_cycles_gen import random_graph_no_neg_cycles_generator#,\
+    #generate_random_neg_cycleless_graph
 import cProfile
 import pstats
 from pstats import SortKey
@@ -20,6 +20,7 @@ GRAPHS_PATH = "src/tests/test_data/synthetic_graphs/"
 
 
 def load_new_graph(graph_info, n: int, k: float):
+    new_path = ""
     if graph_info[0] == "watts-strogatz":
         p = float((graph_info[4][0]+'.'+graph_info[4][1:]))
         k = int(graph_info[5])
@@ -29,7 +30,8 @@ def load_new_graph(graph_info, n: int, k: float):
         if graph_info[0][-1] == '1':
             new_path = random_graph_no_neg_cycles_generator(n,scalar)
         else:
-            new_path = generate_random_neg_cycleless_graph(n,scalar,(1.0-k,k))
+            #new_path = generate_random_neg_cycleless_graph(n,scalar,(1.0-k,k))
+            pass
     else:
         new_path = single_graph_generator(graph_info[0],int(n),(1.0-k,k))
     graph,_ = load_test_case(Path(GRAPHS_PATH+new_path+".json"))

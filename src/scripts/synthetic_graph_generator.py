@@ -111,6 +111,7 @@ def single_graph_generator(graph_family: str, no_of_vertices: int, ratio: tuple[
         filename = f"{graph_family}_{no_of_vertices}_{len(graph.edges)}_{str(ratio[1]).replace(".", "")}"
 
     _save_graph_json(graph, ratio, filename)
+    return filename
 
 
 def generate_multiple_graphs(family: str, no_of_vertices, ratios):
