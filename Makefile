@@ -9,6 +9,12 @@ install:
 build:
 	poetry build
 
+time:
+	poetry run python -m src.scripts.time_algorithms
+
+visualize:
+	poetry run python -m src.scripts.visualize_times
+
 generate-graphs:
 	poetry run python -m src.scripts.synthetic_graph_generator
 
