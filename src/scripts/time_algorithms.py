@@ -26,7 +26,7 @@ def load_new_graph(graph_info, n: int, k: float):
         new_path = single_graph_generator(graph_info[0],int(n),(1.0-k,k),p=p,k=k)
     elif graph_info[0].startswith("random"):
         scalar = int(int(graph_info[2])/n)
-        if graph_info[0][:-1] == '1':
+        if graph_info[0][-1] == '1':
             new_path = random_graph_no_neg_cycles_generator(n,scalar)
         else:
             new_path = generate_random_neg_cycleless_graph(n,scalar,(1.0-k,k))
@@ -49,7 +49,7 @@ def time_algorithms():
         print(graph_file)
         graph,_ = load_test_case(Path(GRAPHS_PATH+graph_file))
         file_name = os.path.basename(os.path.normpath(graph_file))
-        graph_info = (Path(file_name).stem).split('_')
+        graph_info = Path(file_name).stem.split('_')
         
         if graph_info[0] == "grid":
             n = int(graph_info[1].split('x')[0])

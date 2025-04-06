@@ -43,27 +43,25 @@ def bellman_ford(graph : dict[int, dict[int, int]], neg_edges: set, dist: list, 
     return dist
 
 def bfd(graph, neg_edges, dist: list, beta: int, I_prime = None,parent=None, anc_in_I=None,save_source = False):
-    tent_dist = [[distance,inf] for distance in dist]
-    tent_dist = dijkstra(graph, neg_edges, tent_dist, I_prime, parent, anc_in_I, save_source)
+    dist = dijkstra(graph, neg_edges, dist, I_prime, parent, anc_in_I, save_source)
     for _ in range(beta):
-        tent_dist = bellman_ford(graph, neg_edges, tent_dist, I_prime, parent, anc_in_I, save_source)
-        tent_dist = dijkstra(graph, neg_edges, tent_dist, I_prime, parent, anc_in_I, save_source)
-    return [tent_dist[v][0] for v in range(len(graph))]
+        dist = bellman_ford(graph, neg_edges, dist, I_prime, parent, anc_in_I, save_source)
+        dist = dijkstra(graph, neg_edges, dist, I_prime, parent, anc_in_I, save_source)
+    return [dist[v][0] for v in range(len(graph))]
 
 def bfd_save_rounds(graph, neg_edges, dist: list, beta: int):
-    tent_dist = [[distance,inf] for distance in dist]
-    tent_dist = dijkstra(graph, neg_edges, tent_dist)
-    rounds = [[tent_dist[v][0] for v in graph.keys()]]
+    dist = dijkstra(graph, neg_edges, dist)
+    rounds = [[dist[v][0] for v in graph.keys()]]
     for i in range(beta):
         # TODO: find fix to avoid copying the rounds.
-        tent_dist = bellman_ford(graph,neg_edges,tent_dist)
-        tent_dist = dijkstra(graph, neg_edges, tent_dist)
-        rounds.append([tent_dist[v][0] for v in range(len(graph))])
+        dist = bellman_ford(graph,neg_edges,dist)
+        dist = dijkstra(graph, neg_edges, dist)
+        rounds.append([dist[v][0] for v in range(len(graph))])
     return rounds
 
 def b_hop_sssp(source, graph: dict[int, dict[int, int]], neg_edges: set, beta, I_prime=None,parent=None,anc_in_I=None,save_source=False):
-    dist = [inf] * (len(graph.keys()))
-    dist[source] = 0
+    dist = [[inf,inf] for _ in range(len(graph))]
+    dist[source][0] = 0
 
     return bfd(graph, neg_edges, dist, beta, I_prime,parent,anc_in_I, save_source)
 
@@ -240,8 +238,8 @@ def super_source_bfd_save_rounds(graph, neg_edges, subset, beta):
         if v != super_source:
             graph[super_source][v] = 0
 
-    dist = [inf] * (len(graph.keys()))
-    dist[super_source] = 0
+    dist = [[inf,inf] for _ in range(len(graph))]
+    dist[super_source][0] = 0
 
     dists = bfd_save_rounds(graph, neg_edges, dist, beta)
     del graph[super_source]

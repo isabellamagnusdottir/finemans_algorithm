@@ -39,10 +39,10 @@ def test_of_entire_algorithm_on_various_graph_families(filename):
         with pytest.raises(NegativeCycleError):
             fineman(graph, 0)
 
-        if not error_raised:
-            actual = fineman(graph, 0)
-            assert actual == expected
-            assert len(actual) == len(expected)
+    if not error_raised:
+        actual = fineman(graph, 0)
+        assert actual == expected
+        assert len(actual) == len(expected)
 
 
 @pytest.mark.parametrize("filename", [filename for filename in os.listdir("src/tests/test_data/synthetic_graphs")
