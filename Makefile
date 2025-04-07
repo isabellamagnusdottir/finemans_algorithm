@@ -18,7 +18,7 @@ visualize:
 generate-graphs:
 	poetry run python -m src.scripts.synthetic_graph_generator
 
-generate-random_graphs:
+generate-random-graphs:
 	poetry run python -m src.scripts.random_graph_no_neg_cycles_gen
 
 clean:

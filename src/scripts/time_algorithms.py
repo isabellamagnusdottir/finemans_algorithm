@@ -17,15 +17,23 @@ import csv
 import time
 
 GRAPHS_PATH = "src/tests/test_data/synthetic_graphs/"
+SPECIAL_CASES = {"watts-strogatz","random-no-neg-cycles-2","random-no-neg-cycles-1"}
 
 
-def load_new_graph(graph_info, n: int, k: float):
+def load_new_graph(graph_info):
+    print(graph_info[0])
+    if graph_info[0] == "grid":
+        n = int(graph_info[1].split('x')[0])
+    else:
+        n = int(graph_info[1])
+    k = float((graph_info[3][0]+'.'+graph_info[3][1:]))
+
     new_path = ""
     if graph_info[0] == "watts-strogatz":
         p = float((graph_info[4][0]+'.'+graph_info[4][1:]))
         k = int(graph_info[5])
         new_path = single_graph_generator(graph_info[0],int(n),(1.0-k,k),p=p,k=k)
-    elif graph_info[0].startswith("random"):
+    elif graph_info[0].startswith("random-no-neg-cycles"):
         scalar = int(int(graph_info[2])/n)
         if graph_info[0][-1] == '1':
             new_path = random_graph_no_neg_cycles_generator(n,scalar)
@@ -43,7 +51,6 @@ def time_algorithms():
 
     data = []
     files = [filename for filename in os.listdir(GRAPHS_PATH)]
-    
     name = f"{datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}" + "_SSSP_comparison"
     file_path = Path.cwd() / "empiric_data" / f"{name}.csv"
     while files:
@@ -52,27 +59,16 @@ def time_algorithms():
         graph,_ = load_test_case(Path(GRAPHS_PATH+graph_file))
         file_name = os.path.basename(os.path.normpath(graph_file))
         graph_info = Path(file_name).stem.split('_')
-        
-        if graph_info[0] == "grid":
-            n = int(graph_info[1].split('x')[0])
-        else:
-            n = int(graph_info[1])
-
-        k = float((graph_info[3][0]+'.'+graph_info[3][1:]))
-    
-        #compute time for bellman-ford
         bellmanford_times = []
         fineman_times = []
         count = 0
-        while count <= 12:
+        while count <= 24:
             print(count)
-            print(graph[0])
             try:
                 bford_start_time = time.time()
                 result1 = standard_bellman_ford(graph,0)
                 bford_end_time = time.time()
 
-               
                 fineman_start_time = time.time()
                 result2 = fineman(graph,0)
                 fineman_end_time = time.time()
@@ -82,32 +78,46 @@ def time_algorithms():
                 bellmanford_times.append(bford_end_time-bford_start_time)
                 fineman_times.append(fineman_end_time-fineman_start_time)
 
-
-                graph = load_new_graph(graph_info,n,k)
+                graph = load_new_graph(graph_info)
                 count += 1
             except NegativeCycleError: 
                 print(NegativeCycleError)
-                graph = load_new_graph(graph_info,n,k)
+                graph = load_new_graph(graph_info)
                 continue
 
-        bellman_ford_time = np.mean(bellmanford_times[2:])
-        fineman_time = np.mean(fineman_times[2:])
+        bellmanford_time = np.mean(bellmanford_times[4:])
+        fineman_time = np.mean(fineman_times[4:])
 
-        data.append({'file':file_path, 'graph_family': graph_info[0],
-                     'n': n, 'm': graph_info[2], 'k': k,
-                     'bellman_ford_time': bellman_ford_time,
-                     'fineman_time': fineman_time})
+        save_data(file_path,graph_info,fineman_time,bellmanford_time,data)
 
 
     data = sorted(data, key=lambda x: (x['k'], x['n']))
 
     with open(file_path,'w',newline='') as csvfile:
-        fields = ['file','graph_family','n','m','k','bellman_ford_time','fineman_time']
+        fields = ['file','graph_family','n','m','k','neg_edges','bellman_ford_time','fineman_time']
         writer = csv.DictWriter(csvfile,fieldnames=fields)
         writer.writeheader()
         writer.writerows(data)
     csvfile.close()
 
+def save_data(file_path,graph_info,fineman_time,bellmanford_time,data):
+    if graph_info[0] == "grid":
+        n = int(graph_info[1].split('x')[0])
+    else:
+        n = int(graph_info[1])
+
+    neg_edges = np.nan
+    k = np.nan
+    if graph_info[0] in SPECIAL_CASES:
+        neg_edges = int(graph_info[3])
+    else:
+        k = float((graph_info[3][0]+'.'+graph_info[3][1:]))
+
+    data.append({'file':file_path, 'graph_family': graph_info[0],
+                     'n': n, 'm': graph_info[2], 'k': k,
+                     'neg_edges': neg_edges,
+                     'bellman_ford_time': bellmanford_time,
+                     'fineman_time': fineman_time})
 
 def main():
     profiler =  cProfile.Profile()

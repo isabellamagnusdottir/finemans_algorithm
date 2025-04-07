@@ -10,44 +10,57 @@ DEFAULT_PATH = "empiric_data/"
 
 def visualize_timings(csvfile_path:Path):
     family_times = {}
-
-    name = ""
-    k = 0.0
+    if not os.path.isdir(Path.cwd() / "plots"):
+        os.makedirs(Path.cwd() / "plots")
     with open(csvfile_path, 'r', newline='') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            if row['graph_family'] != name or row['k'] != k:
-                name = row['graph_family']
+            if row['graph_family'] not in family_times:
+                family_times[row['graph_family']] = {}
+            if row['graph_family'] == "random-no-neg-cycles-1":
+                n = int(row['n'])
+                m = int(row['m'])
+                scalar = m/n
+                if scalar not in family_times[row['graph_family']]: family_times[row['graph_family']][scalar] = []
+                family_times[row['graph_family']][scalar].append((int(row['n']),float(row['fineman_time']),float(row['bellman_ford_time'])))
+            else:
                 k = row['k']
-                family_times[(name,k)] = []
-            family_times[(name,k)].append((int(row['n']),float(row['fineman_time']),float(row['bellman_ford_time'])))
-    for key,info in family_times.items():
-        family_times[key] = sorted(info, key=lambda x: x[0])
+                if k not in family_times[row['graph_family']]: family_times[row['graph_family']][k] = []
+                family_times[row['graph_family']][k].append((int(row['n']),float(row['fineman_time']),float(row['bellman_ford_time'])))
+    for key,vmap in family_times.items():
+        for v in vmap.values():
+            v = sorted(v, key=lambda x: x[0])
 
     
-    for (graph_type,k),values in family_times.items():
-        x_values = np.array([int(v[0]) for v in values])
+    for graph_type,vmap in family_times.items():
+        for key,values in vmap.items():
+            x_values = np.array([int(v[0]) for v in values])
 
-        plt.figure(figsize=(10, 6))
-        plt.xscale("log")
-        plt.loglog(x_values, [float(v[1]) for v in values], 'mo-', linewidth=2, markersize=8, label='Fineman Running time')
-        plt.loglog(x_values, [float(v[2]) for v in values], 'bo-', linewidth=2, markersize=8, label='Bellman-Ford Running time')
+            plt.figure(figsize=(10, 6))
+            plt.xscale("log")
+            plt.loglog(x_values, [float(v[1]) for v in values], 'mo-', linewidth=2, markersize=8, label='Fineman Running time')
+            plt.loglog(x_values, [float(v[2]) for v in values], 'bo-', linewidth=2, markersize=8, label='Bellman-Ford Running time')
 
-        # Add labels and title
-        if graph_type != 'grid':
-            plt.xlabel('Number of vertices (n)', fontsize=14)
-        else:
-            plt.xlabel('Size of grid (n x n)')
+            # Add labels and title
+            if graph_type == 'grid':
+                plt.xlabel('Size of grid (n x n)', fontsize=14)
+            else:
+                plt.xlabel('Number of vertices (n)', fontsize=14)
+                
+            if graph_type == "random-no-neg-cycles-1":
+                plt.title(f'Fineman running time - Type: {graph_type}\n with edge scalar {key}]', fontsize=14)
+            elif graph_type == "random-no-neg-cycles-2":
+                plt.title(f'Fineman running time - Type: {graph_type}\n with initial positive/negative edge distribution [{1-float(key)},{key}]]', fontsize=14)
+            else:
+                plt.title(f'Fineman running time - Type: {graph_type}\n positive/negative edge distribution: [{1-float(key)},{key}]', fontsize=14)
 
-        plt.ylabel('Time (seconds)', fontsize=14)
-        plt.title(f'Fineman running time - Type: {graph_type}\n positive/negative edge distribution: [{1-float(k)},{k}]', fontsize=14)
-        plt.grid(True, which="both", ls="--", alpha=0.8)
-        plt.legend(fontsize=12)
+            plt.ylabel('Time (seconds)', fontsize=14)
+            plt.grid(True, which="both", ls="--", alpha=0.8)
+            plt.legend(fontsize=12)
 
-        plt.tight_layout()
-        if not os.path.isdir(Path.cwd() / "plots"):
-            os.makedirs(Path.cwd() / "plots")
-        plt.savefig(Path("plots/"+f"fineman_bford_comparison_{graph_type}_{1-float(k)}-{k}.png"))
+            plt.tight_layout()
+            
+            plt.savefig(Path("plots/"+f"fineman_bford_comparison_{graph_type}_{1-float(key)}-{key}.png"))
 
 def main():
     parser = argparse.ArgumentParser()

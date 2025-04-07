@@ -55,7 +55,7 @@ def random_graph_no_neg_cycles_generator(no_of_vertices: int, edge_scalar: int):
             neg_edges.add((u,v))
             failed_attempts = 100
 
-    filename = f"random-no-neg-cycles_{no_of_vertices}_{edge_scalar}_{len(neg_edges)}"
+    filename = f"random-no-neg-cycles-1_{no_of_vertices}_{edge_scalar*no_of_vertices}_{len(neg_edges)}"
     _save_graph_json(graph, filename)
     return filename
 
