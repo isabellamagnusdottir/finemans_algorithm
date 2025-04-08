@@ -27,13 +27,11 @@ def visualize_timings(csvfile_path:Path):
                 k = row['k']
                 if k not in family_times[row['graph_family']]: family_times[row['graph_family']][k] = []
                 family_times[row['graph_family']][k].append((int(row['n']),float(row['fineman_time']),float(row['bellman_ford_time'])))
-    for key,vmap in family_times.items():
-        for v in vmap.values():
-            v = sorted(v, key=lambda x: x[0])
 
     
     for graph_type,vmap in family_times.items():
         for key,values in vmap.items():
+            values.sort(key=lambda x: x[0])
             x_values = np.array([int(v[0]) for v in values])
 
             plt.figure(figsize=(10, 6))

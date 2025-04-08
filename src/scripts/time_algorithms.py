@@ -26,21 +26,22 @@ def load_new_graph(graph_info):
         n = int(graph_info[1].split('x')[0])
     else:
         n = int(graph_info[1])
-    k = float((graph_info[3][0]+'.'+graph_info[3][1:]))
-
     new_path = ""
+
     if graph_info[0] == "watts-strogatz":
-        p = float((graph_info[4][0]+'.'+graph_info[4][1:]))
-        k = int(graph_info[5])
+        k = int(graph_info[4])
+        p = float((graph_info[5][0]+'.'+graph_info[5][1:]))
         new_path = single_graph_generator(graph_info[0],int(n),(1.0-k,k),p=p,k=k)
     elif graph_info[0].startswith("random-no-neg-cycles"):
         scalar = int(int(graph_info[2])/n)
         if graph_info[0][-1] == '1':
             new_path = random_graph_no_neg_cycles_generator(n,scalar)
         else:
-            #new_path = generate_random_neg_cycleless_graph(n,scalar,(1.0-k,k))
+            ratio = float((graph_info[4][0]+'.'+graph_info[4][1:]))
+            #new_path = generate_random_neg_cycleless_graph(n,scalar,(1.0-ratio,ratio))
             pass
     else:
+        k = float((graph_info[3][0]+'.'+graph_info[3][1:]))
         new_path = single_graph_generator(graph_info[0],int(n),(1.0-k,k))
     graph,_ = load_test_case(Path(GRAPHS_PATH+new_path+".json"))
     return graph
@@ -94,7 +95,7 @@ def time_algorithms():
     data = sorted(data, key=lambda x: (x['k'], x['n']))
 
     with open(file_path,'w',newline='') as csvfile:
-        fields = ['file','graph_family','n','m','k','neg_edges','bellman_ford_time','fineman_time']
+        fields = ['file','graph_family','n','m','neg_edges','k','bellman_ford_time','fineman_time']
         writer = csv.DictWriter(csvfile,fieldnames=fields)
         writer.writeheader()
         writer.writerows(data)
@@ -114,9 +115,8 @@ def save_data(file_path,graph_info,fineman_time,bellmanford_time,data):
         k = float((graph_info[3][0]+'.'+graph_info[3][1:]))
 
     data.append({'file':file_path, 'graph_family': graph_info[0],
-                     'n': n, 'm': graph_info[2], 'k': k,
-                     'neg_edges': neg_edges,
-                     'bellman_ford_time': bellmanford_time,
+                     'n': n, 'm': graph_info[2], 'neg_edges': neg_edges,
+                     'k': k,'bellman_ford_time': bellmanford_time,
                      'fineman_time': fineman_time})
 
 def main():
