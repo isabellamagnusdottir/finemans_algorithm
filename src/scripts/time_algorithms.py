@@ -50,16 +50,14 @@ def time_algorithms():
         os.makedirs(Path.cwd() / "empiric_data")
 
     data = []
-    files = [filename for filename in os.listdir(GRAPHS_PATH) if filename.startswith("random-no-neg-cycles-2")]
+    files = [filename for filename in os.listdir(GRAPHS_PATH)]
     name = f"{datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}" + "_SSSP_comparison"
     file_path = Path.cwd() / "empiric_data" / f"{name}.csv"
     while files:
         graph_file = files.pop()
-        #print(graph_file)
         graph,_ = load_test_case(Path(GRAPHS_PATH+graph_file))
         file_name = os.path.basename(os.path.normpath(graph_file))
         graph_info = Path(file_name).stem.split('_')
-        if int(graph_info[1]) > 50: continue
         bellmanford_times = []
         fineman_times = []
         count = 0
@@ -83,7 +81,6 @@ def time_algorithms():
                 count += 1
             except NegativeCycleError: 
                 print(NegativeCycleError)
-                return
                 graph = load_new_graph(graph_info)
                 continue
 
