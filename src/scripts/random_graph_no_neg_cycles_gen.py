@@ -38,10 +38,12 @@ def _save_graph_json(graph: nx.classes.DiGraph, filename: str):
         f.write(json_str)
 
 def generate_random_no_neg_cycles_graph_1(no_of_vertices: int, edge_scalar: int):
-    graph = nx.gnm_random_graph(no_of_vertices, edge_scalar * no_of_vertices, directed=True)
+    # graph = nx.gnm_random_graph(no_of_vertices, edge_scalar * no_of_vertices, directed=True)
+    #
+    # while (not nx.is_weakly_connected(graph)) or (graph.out_degree(0) == 0):
+    #     graph = nx.gnm_random_graph(no_of_vertices, edge_scalar * no_of_vertices, directed=True)
 
-    while (not nx.is_weakly_connected(graph)) or (graph.out_degree(0) == 0):
-        graph = nx.gnm_random_graph(no_of_vertices, edge_scalar * no_of_vertices, directed=True)
+    graph = alternative_graph_generator(no_of_vertices, edge_scalar*no_of_vertices)
 
     for u, v in graph.edges():
         graph[u][v]['weight'] = rand.randint(1, 12)
@@ -90,15 +92,42 @@ def generate_random_no_neg_cycles_graph_2(n,scalar,ratio: tuple[float,float]):
     filename = f"random-no-neg-cycles-2_{n}_{scalar * n}_{neg_count}_{ratio[0]}"
     _save_graph_json(G,filename)
 
+
+def alternative_graph_generator(n, m):
+    graph = nx.DiGraph()
+    graph.add_nodes_from(range(n))
+
+    for i in range(m):
+        if i < n:
+            u = i
+            v = rand.randint(0,n)
+            while u == v:
+                v = rand.randint(0,n)
+
+            if rand.randint(0,1) == 0:
+                graph.add_edge(u, v)
+            else:
+                graph.add_edge(v, u)
+        else:
+            u = rand.randint(0,n)
+            v = rand.randint(0,n)
+            while u == v:
+                v = rand.randint(0,n)
+            graph.add_edge(u, v)
+
+    if (nx.is_weakly_connected(graph)) and (graph.out_degree(0) > 0):
+        return graph
+    return alternative_graph_generator(n,m)
+
 def main():
     sizes = [10, 50, 100, 200, 500, 750, 1000]
     scalars = [3, 5, 6, 9]
-    ratios = [(0.9, 0.1), (0.8, 0.2), (0.66, 0.34), (0.5, 0.5), (0.2, 0.8), (0.0, 1.0)]
+    #ratios = [(0.9, 0.1), (0.8, 0.2), (0.66, 0.34), (0.5, 0.5), (0.2, 0.8), (0.0, 1.0)]
     for num in sizes:
         for scalar in scalars:
             generate_random_no_neg_cycles_graph_1(num, scalar)
-            for ratio in ratios:
-                generate_random_no_neg_cycles_graph_2(num,scalar,ratio)
+            #for ratio in ratios:
+            #    generate_random_no_neg_cycles_graph_2(num,scalar,ratio)
 
 
 if __name__ == '__main__':
