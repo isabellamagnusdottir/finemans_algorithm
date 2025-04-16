@@ -65,8 +65,7 @@ def b_hop_sssp(source, graph: dict[int, dict[int, int]], neg_edges: set, beta, I
 
     return bfd(graph, neg_edges, dist, beta, I_prime,parent,anc_in_I, save_source)
 
-def b_hop_stsp(target, graph: dict[int, dict[int, int]], beta):
-    t_graph, t_neg_edges = transpose_graph(graph)
+def b_hop_stsp(target, t_graph: dict[int, dict[int, int]],t_neg_edges, beta):
     return b_hop_sssp(target, t_graph, t_neg_edges, beta)
 
 def transpose_graph(graph: dict[int, dict[int, int]]):
@@ -133,17 +132,17 @@ def get_set_of_neg_vertices(graph: dict[int, dict[int, int]]):
     return neg_vertices
 
 
-def find_betweenness_set(source, target, graph, neg_edges, beta):
+def find_betweenness_set(source, target, graph, neg_edges,t_graph,t_neg_edges, beta):
     dist1 = b_hop_sssp(source,graph,neg_edges,beta)
-    dist2 = b_hop_stsp(target,graph,beta)
+    dist2 = b_hop_stsp(target,t_graph,t_neg_edges,beta)
     between = set()
     for x in graph.keys():
         if dist1[x]+dist2[x] < 0:
             between.add(x)
     return between
 
-def betweenness(source, target, graph, neg_edges, beta):
-    return len(find_betweenness_set(source,target,graph,neg_edges,beta))
+def betweenness(source, target, graph, neg_edges,t_graph,t_neg_edges, beta):
+    return len(find_betweenness_set(source,target,graph,neg_edges,t_graph,t_neg_edges,beta))
 
 
 def reweight_graph_and_composes_price_functions(graph: dict[int, dict[int, int]], new_price_function: list[int], existing: list[int], with_transpose = False):

@@ -8,6 +8,7 @@ from numpy import inf
 from src.fineman import preprocess_graph
 from src.fineman.dijkstra import dijkstra
 from src.fineman.elimination_algorithm import elimination_algorithm
+from src.fineman.helper_functions import transpose_graph
 
 
 def _compute_original_distances(source, reweighted_distances, composed_price_function):
@@ -63,9 +64,9 @@ def fineman(graph: dict[int, dict[int, int]], source: int, seed = None):
 
     m = sum(len(neighbors) for neighbors in graph.values())
     graph, neg_edges = preprocess_graph(graph, org_n, m)
+    t_graph,t_neg_edges = transpose_graph(graph)
 
     n = len(graph.keys())
-    neg_edges = {(u,v) for u, edges in graph.items() for v, w in edges.items() if w < 0}
 
     all_price_functions = [0] * len(graph)
 
@@ -74,7 +75,7 @@ def fineman(graph: dict[int, dict[int, int]], source: int, seed = None):
         k = len(neg_edges)
 
         for _ in range(int(k**(2/3))):
-            graph, neg_edges, _, price_function = elimination_algorithm(graph, neg_edges)
+            graph, neg_edges, _, price_function,t_graph,t_neg_edges = elimination_algorithm(graph, neg_edges, t_graph, t_neg_edges)
 
             for idx in range(len(price_function)):
                 all_price_functions[idx] += price_function[idx]

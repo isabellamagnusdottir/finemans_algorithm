@@ -13,13 +13,13 @@ def _compute_price_function_to_eliminate_independent_set(graph, independent_set)
     return super_source_bfd(graph_out_I, out_I, 1)
 
 
-def _compute_price_function_to_make_U_r_remote(graph, neg_edges, negative_sandwich, beta):
+def _compute_price_function_to_make_U_r_remote(graph, neg_edges,t_graph,t_neg_edges, negative_sandwich, beta):
 
-    (x,U,y) = negative_sandwich
+    (x,_,y) = negative_sandwich
     phi = [0] * len(graph)
 
     dists_from_x = b_hop_sssp(x, graph, neg_edges, beta)
-    dists_to_y = b_hop_stsp(y, graph, beta)
+    dists_to_y = b_hop_stsp(y, t_graph,t_neg_edges, beta)
 
     for v in graph.keys():
         phi[v] = min(0, max(dists_from_x[v], -(dists_to_y[v])))
@@ -43,7 +43,7 @@ def _subgraph_of_pos_edges_and_out_set(graph: dict[int, dict[int, int]], out_set
     return new_graph, new_neg_edges
 
 
-def elimination_algorithm(org_graph, org_neg_edges, seed = None):
+def elimination_algorithm(org_graph, org_neg_edges,t_graph_org,t_neg_edges_org, seed = None):
     composed_price_function = [0] * len(org_graph)
     n = len(org_graph.keys())
 
@@ -51,36 +51,36 @@ def elimination_algorithm(org_graph, org_neg_edges, seed = None):
     k = len(org_neg_edges)
     r = ceil(k**(1/9))
 
-    phi_1 = betweenness_reduction(org_graph, org_neg_edges, tau=r, beta=r+1, c=c)
-    graph_phi1, neg_edges, U_0, composed_price_function,graph_T,neg_edges_T = reweight_graph_and_composes_price_functions(org_graph, phi_1, composed_price_function,with_transpose=True)
+    phi_1 = betweenness_reduction(org_graph, org_neg_edges,t_graph_org,t_neg_edges_org, tau=r, beta=r+1, c=c)
+    graph_phi1, neg_edges, U_0, composed_price_function,t_graph,t_neg_edges = reweight_graph_and_composes_price_functions(org_graph, phi_1, composed_price_function, with_transpose=True)
 
     if len(neg_edges) == 0: return graph_phi1, neg_edges, U_0, composed_price_function
 
     match find_is_or_crust(graph_phi1, neg_edges, U_0, c, c+1):
         case (y,U_1):
 
-            match find_is_or_crust(graph_T, neg_edges_T, U_1, c, c+1):
+            match find_is_or_crust(t_graph, t_neg_edges, U_1, c, c+1):
                 case (x,U_2):
                     while len(U_2) > k**(1/3):
                         U_2.pop()
-                    phi_2 = _compute_price_function_to_make_U_r_remote(graph_phi1, neg_edges, (x,U_2,y), beta=r+1)
+                    phi_2 = _compute_price_function_to_make_U_r_remote(graph_phi1, neg_edges,t_graph,t_neg_edges, (x,U_2,y), beta=r+1)
 
                     graph_phi1_phi2, neg_edges, _, composed_price_function = reweight_graph_and_composes_price_functions(graph_phi1, phi_2, composed_price_function)
 
                     if len(compute_reach(graph_phi1_phi2, neg_edges, U_2, r)) > n / r:
-                        return elimination_algorithm(org_graph, org_neg_edges)
+                        return elimination_algorithm(org_graph, org_neg_edges,t_graph_org,t_neg_edges_org)
 
                     out_U_2 = {(u, v) for u in U_2 for v in org_graph[u].keys()}
                     graph_phi1_phi2_out_U_2, neg_edges = _subgraph_of_pos_edges_and_out_set(graph_phi1_phi2, out_U_2)
                     phi = elimination_of_r_remote_edges_by_hop_reduction(graph_phi1_phi2_out_U_2, neg_edges, r)
 
-                    return reweight_graph_and_composes_price_functions(graph_phi1_phi2, phi, composed_price_function)
+                    return reweight_graph_and_composes_price_functions(graph_phi1_phi2, phi, composed_price_function,with_transpose=True)
 
                 case I:
                     phi = _compute_price_function_to_eliminate_independent_set(graph_phi1, I)
-                    return reweight_graph_and_composes_price_functions(graph_phi1, phi, composed_price_function)
+                    return reweight_graph_and_composes_price_functions(graph_phi1, phi, composed_price_function,with_transpose=True)
 
 
         case I:
             phi = _compute_price_function_to_eliminate_independent_set(graph_phi1, I)
-            return reweight_graph_and_composes_price_functions(graph_phi1, phi, composed_price_function)
+            return reweight_graph_and_composes_price_functions(graph_phi1, phi, composed_price_function,with_transpose=True)

@@ -2,7 +2,7 @@ from math import ceil, log
 import random as rand
 from src.fineman.helper_functions import b_hop_sssp, b_hop_stsp, super_source_bfd
 
-def betweenness_reduction(graph: dict[int, dict[int, int]], neg_edges, tau, beta, c, seed = None):
+def betweenness_reduction(graph: dict[int, dict[int, int]], neg_edges,t_graph,t_neg_edges, tau, beta, c, seed = None):
     if (beta < 1) or (tau < 1) or (tau > len(graph)) or (c <= 1):
         raise ValueError("Invalid parameter")
 
@@ -18,7 +18,7 @@ def betweenness_reduction(graph: dict[int, dict[int, int]], neg_edges, tau, beta
 
     distances = {}
     for x in T:
-        distances[x] = (b_hop_sssp(x, graph, neg_edges, beta), b_hop_stsp(x, graph, beta))
+        distances[x] = (b_hop_sssp(x, graph, neg_edges, beta), b_hop_stsp(x, t_graph,t_neg_edges, beta))
 
     h_graph, h_neg_edges = _construct_h(graph, T, distances)
     
