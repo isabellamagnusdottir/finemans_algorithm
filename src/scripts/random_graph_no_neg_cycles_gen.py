@@ -33,13 +33,16 @@ def _graph_to_json(graph: nx.classes.DiGraph):
                 graph_data[str(u)].append([v, graph[u][v]['weight']])
     return graph_data
 
-
-def _save_graph_json(graph: nx.classes.DiGraph, filename: str):
-    json_data = _graph_to_json(graph)
+def _save_to_json(json_data,filename: str):
     with open("src/tests/test_data/synthetic_graphs/" + filename + ".json", 'w') as f:
         json_str = json.dumps(json_data, indent=2)
         json_str = re.sub(r'\[\n\s*(\d+),\n\s*(-?\d+)\n\s*\]', r'[\1,\2]', json_str)
         f.write(json_str)
+
+def _save_graph_json(graph: nx.classes.DiGraph, filename: str):
+    json_data = _graph_to_json(graph)
+    _save_to_json(json_data,filename)
+
 
 def generate_random_no_neg_cycles_graph_1(no_of_vertices: int, edge_scalar: int):
     graph = nx.gnm_random_graph(no_of_vertices, edge_scalar * no_of_vertices, directed=True)
@@ -101,12 +104,7 @@ def generate_random_no_neg_cycles_graph_2(n,scalar,ratio: tuple[float,float]):
                 neg_count += 1
 
     filename = f"random-no-neg-cycles-2_{n}_{scalar * n}_{neg_count}_{str(ratio[1]).replace(".","")}"
-    print(filename)
-    with open("src/tests/test_data/synthetic_graphs/" + filename + ".json", 'w') as f:
-        json_str = json.dumps(json_graph, indent=2)
-        json_str = re.sub(r'\[\n\s*(\d+),\n\s*(-?\d+)\n\s*\]', r'[\1,\2]', json_str)
-        f.write(json_str)
-        f.close()
+    _save_to_json(json_graph,filename)
     return filename
 
 def main():
