@@ -48,7 +48,7 @@ def test_of_entire_algorithm_on_various_graph_families(filename):
 @pytest.mark.parametrize("filename", [filename for filename in os.listdir("src/tests/test_data/synthetic_graphs")
                                       if filename.startswith("grid")])
 def test_of_entire_algorithm_on_grids(filename):
-    graph, _ = load_test_case(TESTDATA_FILEPATH + "synthetic_graphs/" + filename)
+    graph, _ = load_test_case(TESTDATA_FILEPATH + "synthetic_graphs/" + filename, only_cc=True)
     expected = []
     error_raised = False
     try:
@@ -69,7 +69,7 @@ def test_of_entire_algorithm_on_grids(filename):
                                       if filename.startswith("random_")])
 @pytest.mark.parametrize("repeat", range(2))
 def test_of_entire_algorithm_on_random_graphs_of_varying_size_and_pos_neg_ratio(filename, repeat):
-    graph, neg_edges = load_test_case(TESTDATA_FILEPATH + "synthetic_graphs/" + filename)
+    graph, neg_edges = load_test_case(TESTDATA_FILEPATH + "synthetic_graphs/" + filename, only_cc=True)
     expected = []
     error_raised = False
     try:
@@ -121,7 +121,7 @@ def test_inverse_dist_array(price_function):
 
     dists = standard_bellman_ford(graph, 0)
 
-    assert org_dists == _compute_original_distances(0, dists, composed_pf)
+    assert org_dists == _compute_original_distances(0, 10, dists, composed_pf)
 
 
 def test_finding_connected_component_to_source_on_disconnected_graphs():
