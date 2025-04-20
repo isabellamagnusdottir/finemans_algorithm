@@ -17,17 +17,12 @@ def fineman(graph: dict[int, dict[int, int]], source: int, seed = None):
     n = len(graph.keys())
     neg_edges = {(u,v) for u, edges in graph.items() for v, w in edges.items() if w < 0}
 
-    all_price_functions = [0] * len(graph)
-
     for _ in range(int(log2(n))):
 
         k = len(neg_edges)
 
         for _ in range(int(k**(2/3))):
-            graph, neg_edges, _, price_function = elimination_algorithm(graph, neg_edges)
-
-            for idx in range(len(price_function)):
-                all_price_functions[idx] += price_function[idx]
+            graph, neg_edges, _ = elimination_algorithm(graph, neg_edges)
 
             if len(neg_edges) == 0: break
 
