@@ -4,11 +4,12 @@ from collections import deque
 
 def _find_connected_component_to_source(graph, source: int):
     mapping = {}
+    mapping[source] = 0
 
     queue = deque()
-    explored = [False] * len(graph)
-    mapping[source] = 0
     queue.append(source)
+
+    explored = [False] * len(graph)
     explored[source] = True
 
     new_graph = {0: {}}
@@ -28,8 +29,9 @@ def _find_connected_component_to_source(graph, source: int):
             new_graph[mapping[vertex]][mapping[n]] = w
             if w < 0:
                 neg_edges.add((mapping[vertex], mapping[n]))
-
+                
     return new_graph, neg_edges
+
 
 def load_test_case(path: str, only_cc = False) -> tuple[dict[int, dict[int, int]], set[tuple[int, int]]]:
 

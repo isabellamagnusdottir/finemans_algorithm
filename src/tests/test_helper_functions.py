@@ -340,12 +340,11 @@ def test_reweight_path_given_price_function(price_function, expected_graph):
     expected_neg_edges = {(u, v) for u, edges in expected_graph.items() for v, w in edges.items() if w < 0}
     expected_neg_vertices = {u for u, _ in expected_neg_edges}
 
-    actual_graph, actual_neg_edges, actual_neg_vertices, actual_price_function = reweight_graph_and_composes_price_functions(graph, price_function)
+    actual_graph, actual_neg_edges, actual_neg_vertices = reweight_graph_and_composes_price_functions(graph, price_function)
 
     assert actual_graph == expected_graph
     assert actual_neg_edges == expected_neg_edges
     assert actual_neg_vertices == expected_neg_vertices
-    assert actual_price_function == price_function
 
 @pytest.mark.parametrize("price_function,expected_graph", [
     ([-3,5,-7,-1],
@@ -358,12 +357,11 @@ def test_reweight_cycle_given_price_function(price_function, expected_graph):
     expected_neg_edges = {(u,v) for u, edges in expected_graph.items() for v, w in edges.items() if w < 0}
     expected_neg_vertices = {u for u,_ in expected_neg_edges}
 
-    actual_graph, actual_neg_edges, actual_neg_vertices, actual_price_function = reweight_graph_and_composes_price_functions(graph, price_function)
+    actual_graph, actual_neg_edges, actual_neg_vertices = reweight_graph_and_composes_price_functions(graph, price_function)
 
     assert actual_graph == expected_graph
     assert actual_neg_edges == expected_neg_edges
     assert actual_neg_vertices == expected_neg_vertices
-    assert actual_price_function == price_function
 
 
 @pytest.mark.parametrize("subset,expected", [
