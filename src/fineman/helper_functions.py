@@ -52,7 +52,7 @@ def bfd(graph, neg_edges, dist: list, beta: int, I_prime = None,parent=None, anc
 def bfd_save_rounds(graph, neg_edges, dist: list, beta: int):
     dist = dijkstra(graph, neg_edges, dist)
     rounds = [[dist[v][0] for v in graph.keys()]]
-    for i in range(beta):
+    for _ in range(beta):
         # TODO: find fix to avoid copying the rounds.
         dist = bellman_ford(graph,neg_edges,dist)
         dist = dijkstra(graph, neg_edges, dist)
@@ -146,14 +146,13 @@ def betweenness(source, target, graph, neg_edges, beta):
     return len(find_betweenness_set(source,target,graph,neg_edges,beta))
 
 
-def reweight_graph_and_composes_price_functions(graph: dict[int, dict[int, int]], new_price_function: list[int], existing: list[int], with_transpose = False):
+def reweight_graph_and_composes_price_functions(graph: dict[int, dict[int, int]], new_price_function: list[int], with_transpose = False):
     """
     Reweights the given graph with the provided new_price_function, and composes the new_price_function with existing
     precomputed price functions.
 
     :param graph: the initial graphs, which needs to be reweighted (dict[int, dict[int, int]])
     :param new_price_function: the price function which reweights the graph (list[int])
-    :param existing: the composed price function of previously computed price functions (list[int])
     :param with_transpose: boolean flag deciding whether a transpose graph should be generated as well
 
     :return: the graph reweighted in new_price_function, a set of the negative edges, a set of the negative vertices,
@@ -169,7 +168,6 @@ def reweight_graph_and_composes_price_functions(graph: dict[int, dict[int, int]]
 
 
     for u, edges in graph.items():
-        existing[u] += new_price_function[u]
 
         if u not in new_graph:
             new_graph[u] = {}
@@ -191,9 +189,9 @@ def reweight_graph_and_composes_price_functions(graph: dict[int, dict[int, int]]
                 if with_transpose: negative_edges_T.add((v,u))
 
     if with_transpose:
-        return new_graph, new_neg_edges, negative_vertices, existing, new_graph_T, negative_edges_T 
+        return new_graph, new_neg_edges, negative_vertices, new_graph_T, negative_edges_T 
     else:
-        return new_graph, new_neg_edges, negative_vertices, existing
+        return new_graph, new_neg_edges, negative_vertices
 
 
 def reweight_graph_and_get_price_functions(graph, new_price_function, existing):
@@ -228,8 +226,6 @@ def _compute_ancestor_parent(parent, anc_in_I, I_prime, u: int,v: int, super_sou
         anc_in_I[v] = parent[v]
     else:
         anc_in_I[v] = anc_in_I[parent[v]]
-
-
 
 def super_source_bfd_save_rounds(graph, neg_edges, subset, beta):
     super_source = len(graph)

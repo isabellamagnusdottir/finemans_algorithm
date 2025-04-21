@@ -12,7 +12,7 @@ TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
 def _assert_reduced_betweenness(price_function, graph, neg_edges, beta, threshold):
     assert any(betweenness(u, v, graph, neg_edges, beta) > threshold for v in graph.keys() for u in graph.keys())
 
-    reweighted_graph, neg_edges, _, _ = reweight_graph_and_composes_price_functions(graph, price_function, [0] * len(graph))
+    reweighted_graph, neg_edges, _ = reweight_graph_and_composes_price_functions(graph, price_function)
     assert all(betweenness(u, v, reweighted_graph, neg_edges, beta) <= threshold for v in reweighted_graph.keys() for u in reweighted_graph.keys())
 
 def _compute_constants(neg_edges):
