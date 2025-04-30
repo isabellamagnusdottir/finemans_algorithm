@@ -49,12 +49,12 @@ def time_algorithms():
     if not os.path.isdir(Path.cwd() / "empiric_data"):
         os.makedirs(Path.cwd() / "empiric_data")
 
-    data = []
     files = [filename for filename in os.listdir(GRAPHS_PATH)]
+    files = sorted(files, key=lambda x: (x.split("_")[0], int(x.split("_")[1]), int(x.split("_")[2]), x.split("_")[3]))
+
     name = f"{datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}" + "_SSSP_comparison"
     file_path = Path.cwd() / "empiric_data" / f"{name}.csv"
-    while files:
-        graph_file = files.pop()
+    for graph_file in files:
         graph,_ = load_test_case(Path(GRAPHS_PATH+graph_file))
         file_name = os.path.basename(os.path.normpath(graph_file))
         graph_info = Path(file_name).stem.split('_')
@@ -87,19 +87,10 @@ def time_algorithms():
         bellmanford_time = np.mean(bellmanford_times[4:])
         fineman_time = np.mean(fineman_times[4:])
 
-        save_data(file_path,graph_info,fineman_time,bellmanford_time,data)
 
+        save_line(file_path, graph_info, fineman_time, bellmanford_time)
 
-    data = sorted(data, key=lambda x: (x['k'], x['n']))
-
-    with open(file_path,'w',newline='') as csvfile:
-        fields = ['file','graph_family','n','m','neg_edges','k','bellman_ford_time','fineman_time']
-        writer = csv.DictWriter(csvfile,fieldnames=fields)
-        writer.writeheader()
-        writer.writerows(data)
-    csvfile.close()
-
-def save_data(file_path,graph_info,fineman_time,bellmanford_time,data):
+def save_line(file_path, graph_info, fineman_time, bellmanford_time):
     if graph_info[0] == "grid":
         n = int(graph_info[1].split('x')[0])
     else:
@@ -112,10 +103,21 @@ def save_data(file_path,graph_info,fineman_time,bellmanford_time,data):
     else:
         k = float((graph_info[3][0]+'.'+graph_info[3][1:]))
 
-    data.append({'file':file_path, 'graph_family': graph_info[0],
+    line = {'file':file_path, 'graph_family': graph_info[0],
                      'n': n, 'm': graph_info[2], 'neg_edges': neg_edges,
                      'k': k,'bellman_ford_time': bellmanford_time,
-                     'fineman_time': fineman_time})
+                     'fineman_time': fineman_time}
+
+    write_header = not os.path.exists(file_path)
+
+    with open(file_path, 'a', newline='', buffering=1) as csvfile:
+        fields = ['file','graph_family','n','m','neg_edges','k','bellman_ford_time','fineman_time']
+        writer = csv.DictWriter(csvfile, fieldnames=fields)
+
+        if write_header:
+            writer.writeheader()
+        writer.writerow(line)
+
 
 def main():
     profiler =  cProfile.Profile()
