@@ -36,7 +36,7 @@ def bellman_ford(graph : dict[int, dict[int, int]], neg_edges: set, dist: list, 
         alt_dist = dist[u][0] + graph[u][v]
 
         if alt_dist < dist[v][0]:
-            dist[v][1] = alt_dist
+            dist[v][1] = min(alt_dist, dist[v][1])
             if save_source:
                 _compute_ancestor_parent(parent, anc_in_I, I_prime, u,v, len(graph))
 
