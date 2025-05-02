@@ -8,8 +8,8 @@ from networkx.classes import DiGraph
 
 def _get_weight(weights):
     if rand.choices([True, False], weights)[0]:
-        return rand.randint(0, 30)
-    return rand.randint(-10, -1)
+        return round(rand.uniform(0.0, 30.0), 2)
+    return round(rand.uniform(-10.0, -1.0), 2)
 
 
 def _graph_to_json(graph: DiGraph, weights):
@@ -29,7 +29,7 @@ def _save_graph_json(graph: DiGraph, weights, filename: str):
     json_data = _graph_to_json(graph, weights)
     with open("src/tests/test_data/synthetic_graphs/" + filename + ".json", 'w') as f:
         json_str = json.dumps(json_data, indent=2)
-        json_str = re.sub(r'\[\n\s*(\d+),\n\s*(-?\d+)\n\s*\]', r'[\1,\2]', json_str)
+        json_str = re.sub(r'\[\n\s*(\d+),\n\s*(-?\d+(\.\d+)?)\n\s*\]', r'[\1,\2]', json_str)
         f.write(json_str)
 
 

@@ -5,7 +5,7 @@ from src.utils.threshold_error import InvalidThresholdError
 
 SCALAR_FOR_THRESHOLD = 4
 
-def ensure_neg_vertices_has_degree_of_one(graph: dict[int, dict[int, int]]):
+def ensure_neg_vertices_has_degree_of_one(graph: dict[int, dict[int, float]]):
     
     n = len(graph.keys())
     neg_vertices = get_set_of_neg_vertices(graph)
@@ -29,7 +29,7 @@ def ensure_neg_vertices_has_degree_of_one(graph: dict[int, dict[int, int]]):
     return graph
 
 
-def ensure_max_degree(graph: dict[int, dict[int, int]], threshold: int):
+def ensure_max_degree(graph: dict[int, dict[int, float]], threshold: int):
 
     n = len(graph.keys())
 
@@ -80,7 +80,7 @@ def compute_threshold(n: int, m: int):
     return threshold
 
 
-def preprocess_graph(graph: dict[int, dict[int, int]], n, m):
+def preprocess_graph(graph: dict[int, dict[int, float]], n, m):
 
     threshold = compute_threshold(n, m)
 

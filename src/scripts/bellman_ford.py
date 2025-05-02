@@ -3,7 +3,7 @@ from numpy import inf
 from src.utils.cycle_error import NegativeCycleError
 
 
-def standard_bellman_ford(graph: dict[int, dict[int, int]], source: int, with_parent = False):
+def standard_bellman_ford(graph: dict[int, dict[int, float]], source: int, with_parent = False):
     dist = [inf]*len(graph)
     dist[source] = 0
     if with_parent: parent = [None] * len(graph)
