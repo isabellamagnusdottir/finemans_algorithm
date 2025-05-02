@@ -4,7 +4,7 @@ from numpy import nan,inf
 from src.utils import NegativeCycleError
 
 
-def dijkstra(graph: dict[int, dict[int, int]], neg_edges: set, dist: list, I_prime = None, parent = None, anc_in_I=None, save_source = False):
+def dijkstra(graph: dict[int, dict[int, float]], neg_edges: set, dist: list, I_prime = None, parent = None, anc_in_I=None, save_source = False):
 
     pq = PriorityQueue()
 
@@ -30,7 +30,7 @@ def dijkstra(graph: dict[int, dict[int, int]], neg_edges: set, dist: list, I_pri
     return dist
 
 
-def bellman_ford(graph : dict[int, dict[int, int]], neg_edges: set, dist: list, I_prime = None, anc_in_I = None, parent = None, save_source = False):
+def bellman_ford(graph : dict[int, dict[int, float]], neg_edges: set, dist: list, I_prime = None, anc_in_I = None, parent = None, save_source = False):
 
     for (u,v) in neg_edges:
         alt_dist = dist[u][0] + graph[u][v]
@@ -59,17 +59,17 @@ def bfd_save_rounds(graph, neg_edges, dist: list, beta: int):
         rounds.append([dist[v][0] for v in range(len(graph))])
     return rounds
 
-def b_hop_sssp(source, graph: dict[int, dict[int, int]], neg_edges: set, beta, I_prime=None,parent=None,anc_in_I=None,save_source=False):
+def b_hop_sssp(source, graph: dict[int, dict[int, float]], neg_edges: set, beta, I_prime=None,parent=None,anc_in_I=None,save_source=False):
     dist = [[inf,inf] for _ in range(len(graph))]
     dist[source][0] = 0
 
     return bfd(graph, neg_edges, dist, beta, I_prime,parent,anc_in_I, save_source)
 
-def b_hop_stsp(target, graph: dict[int, dict[int, int]], beta):
+def b_hop_stsp(target, graph: dict[int, dict[int, float]], beta):
     t_graph, t_neg_edges = transpose_graph(graph)
     return b_hop_sssp(target, t_graph, t_neg_edges, beta)
 
-def transpose_graph(graph: dict[int, dict[int, int]]):
+def transpose_graph(graph: dict[int, dict[int, float]]):
     t_graph = {}
     t_neg_edges = set()
 
@@ -110,7 +110,7 @@ def subset_bfd(graph, neg_edges, subset, beta: int, I_prime=None, save_source=Fa
     return _subset_bfd(graph,neg_edges,subset,beta,I_prime,save_source)[:-1]
 
 
-def super_source_bfd(graph: dict[int, dict[int, int]], neg_edges: set, beta, cycleDetection = False):
+def super_source_bfd(graph: dict[int, dict[int, float]], neg_edges: set, beta, cycleDetection = False):
     distances1 = _subset_bfd(graph,neg_edges,graph.keys(),beta)
     if cycleDetection:
         tent_dist = [[distance,inf] for distance in distances1]
@@ -122,7 +122,7 @@ def super_source_bfd(graph: dict[int, dict[int, int]], neg_edges: set, beta, cyc
 
     return distances1[:-1]
 
-def get_set_of_neg_vertices(graph: dict[int, dict[int, int]]):
+def get_set_of_neg_vertices(graph: dict[int, dict[int, float]]):
     neg_vertices = set()
 
     for vertex, edges in graph.items():
@@ -146,12 +146,12 @@ def betweenness(source, target, graph, neg_edges, beta):
     return len(find_betweenness_set(source,target,graph,neg_edges,beta))
 
 
-def reweight_graph_and_composes_price_functions(graph: dict[int, dict[int, int]], new_price_function: list[int], with_transpose = False):
+def reweight_graph_and_composes_price_functions(graph: dict[int, dict[int, float]], new_price_function: list[int], with_transpose = False):
     """
     Reweights the given graph with the provided new_price_function, and composes the new_price_function with existing
     precomputed price functions.
 
-    :param graph: the initial graphs, which needs to be reweighted (dict[int, dict[int, int]])
+    :param graph: the initial graphs, which needs to be reweighted (dict[int, dict[int, float]])
     :param new_price_function: the price function which reweights the graph (list[int])
     :param with_transpose: boolean flag deciding whether a transpose graph should be generated as well
 
@@ -177,7 +177,6 @@ def reweight_graph_and_composes_price_functions(graph: dict[int, dict[int, int]]
 
         for v, w in edges.items():
             new_graph[u][v] = w + new_price_function[u] - new_price_function[v]
-
 
             if with_transpose:
                 if v not in new_graph_T: new_graph_T[v] = {}

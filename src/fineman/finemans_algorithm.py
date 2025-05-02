@@ -5,13 +5,13 @@ from src.fineman import preprocess_graph
 from src.fineman.dijkstra import dijkstra
 from src.fineman.elimination_algorithm import elimination_algorithm
 
-def fineman(graph: dict[int, dict[int, int]], source: int, seed = None):
+def fineman(graph: dict[int, dict[int, float]], source: int, seed = None):
 
     if seed is not None: rand.seed(seed)
 
     org_n = len(graph.keys())
-
     m = sum(len(neighbors) for neighbors in graph.values())
+
     graph, neg_edges = preprocess_graph(graph, org_n, m)
     org_graph = graph.copy()
     n = len(graph.keys())
@@ -26,6 +26,6 @@ def fineman(graph: dict[int, dict[int, int]], source: int, seed = None):
 
             if len(neg_edges) == 0: break
 
-    distances = dijkstra(graph, source,org_graph)[:org_n]
+    distances = dijkstra(graph, source, org_graph)[:org_n]
 
     return distances

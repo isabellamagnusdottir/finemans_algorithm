@@ -27,7 +27,7 @@ def _compute_price_function_to_make_U_r_remote(graph, neg_edges, negative_sandwi
     return phi
 
 
-def _subgraph_of_pos_edges_and_out_set(graph: dict[int, dict[int, int]], out_set: set):
+def _subgraph_of_pos_edges_and_out_set(graph: dict[int, dict[int, float]], out_set: set):
     new_graph = {}
     new_neg_edges = set()
 

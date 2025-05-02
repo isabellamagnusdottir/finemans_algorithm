@@ -33,7 +33,7 @@ def _digraph_to_json(graph: nx.classes.DiGraph):
                 graph_data[str(u)].append([v, graph[u][v]['weight']])
     return graph_data
 
-def _graph_to_json(graph: dict[int, dict[int, int]]):
+def _graph_to_json(graph: dict[int, dict[int, float]]):
     json_graph = {}
     neg_count = 0
     for u in graph.keys():
@@ -58,7 +58,7 @@ def generate_random_no_neg_cycles_graph_1(no_of_vertices: int, edge_scalar: int)
         graph = nx.gnm_random_graph(no_of_vertices, edge_scalar * no_of_vertices, directed=True)
 
     for u, v in graph.edges():
-        graph[u][v]['weight'] = rand.randint(1, 12)
+        graph[u][v]['weight'] = round(rand.uniform(1.0, 12.0), 2)
 
     all_edges = list(graph.edges())
     rand.shuffle(all_edges)
