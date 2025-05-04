@@ -1,29 +1,28 @@
-from queue import PriorityQueue
 from numpy import nan,inf
+import heapq
 
 from src.utils import NegativeCycleError
 
 
-def dijkstra(graph: dict[int, dict[int, float]], neg_edges: set, dist: list, I_prime = None, parent = None, anc_in_I=None, save_source = False):
-
-    pq = PriorityQueue()
+def dijkstra(graph: dict[int, dict[int, float]], neg_edges: set, dist: list, pq, I_prime = None, parent = None, anc_in_I=None, save_source = False):
 
     for v in graph.keys():
-        dist[v][0] = min(dist[v][0],dist[v][1])
+        dist[v][0] = min(dist[v][0], dist[v][1])
         dist[v][1] = inf
-        pq.put((dist[v][0], v))
+        heapq.heappush(pq, (dist[v][0], v))
 
-    while not pq.empty():
-        current_dist, u = pq.get()
+    while pq:
+        current_dist, u = heapq.heappop(pq)
+
         if current_dist > dist[u][0]:
             continue
         for v in graph[u]:
             if (u,v) in neg_edges:
                 continue
-            alt_dist = dist[u][0]+graph[u][v]
+            alt_dist = dist[u][0] + graph[u][v]
             if alt_dist < dist[v][0]:
                 dist[v][0] = alt_dist
-                pq.put((alt_dist,v))
+                heapq.heappush(pq, (alt_dist, v))
 
                 if save_source:
                     _compute_ancestor_parent(parent, anc_in_I, I_prime, u,v, len(graph))
@@ -37,33 +36,33 @@ def bellman_ford(graph : dict[int, dict[int, float]], neg_edges: set, dist: list
 
         if alt_dist < dist[v][0]:
             dist[v][1] = min(alt_dist, dist[v][1])
+
             if save_source:
                 _compute_ancestor_parent(parent, anc_in_I, I_prime, u,v, len(graph))
 
     return dist
 
-def bfd(graph, neg_edges, dist: list, beta: int, I_prime = None,parent=None, anc_in_I=None,save_source = False):
-    dist = dijkstra(graph, neg_edges, dist, I_prime, parent, anc_in_I, save_source)
-    for _ in range(beta):
-        dist = bellman_ford(graph, neg_edges, dist, I_prime, parent, anc_in_I, save_source)
-        dist = dijkstra(graph, neg_edges, dist, I_prime, parent, anc_in_I, save_source)
-    return [dist[v][0] for v in range(len(graph))]
 
 def bfd_save_rounds(graph, neg_edges, dist: list, beta: int):
-    dist = dijkstra(graph, neg_edges, dist)
+    pq = []
+    dist = dijkstra(graph, neg_edges, dist, pq)
     rounds = [[dist[v][0] for v in graph.keys()]]
     for _ in range(beta):
-        # TODO: find fix to avoid copying the rounds.
         dist = bellman_ford(graph,neg_edges,dist)
-        dist = dijkstra(graph, neg_edges, dist)
+        dist = dijkstra(graph, neg_edges, dist, pq)
         rounds.append([dist[v][0] for v in range(len(graph))])
     return rounds
 
-def b_hop_sssp(source, graph: dict[int, dict[int, float]], neg_edges: set, beta, I_prime=None,parent=None,anc_in_I=None,save_source=False):
+def b_hop_sssp(source, graph: dict[int, dict[int, float]], neg_edges: set, beta, I_prime=None, parent=None, anc_in_I=None, save_source=False):
     dist = [[inf,inf] for _ in range(len(graph))]
     dist[source][0] = 0
+    pq = []
 
-    return bfd(graph, neg_edges, dist, beta, I_prime,parent,anc_in_I, save_source)
+    dist = dijkstra(graph, neg_edges, dist, pq, I_prime, parent, anc_in_I, save_source)
+    for _ in range(beta):
+        dist = bellman_ford(graph, neg_edges, dist, I_prime, parent, anc_in_I, save_source)
+        dist = dijkstra(graph, neg_edges, dist, pq, I_prime, parent, anc_in_I, save_source)
+    return [dist[v][0] for v in range(len(graph))]
 
 def b_hop_stsp(target, graph: dict[int, dict[int, float]], beta):
     t_graph, t_neg_edges = transpose_graph(graph)
@@ -115,7 +114,7 @@ def super_source_bfd(graph: dict[int, dict[int, float]], neg_edges: set, beta, c
     if cycleDetection:
         tent_dist = [[distance,inf] for distance in distances1]
         tent_dist = bellman_ford(graph, neg_edges, tent_dist)
-        tent_dist = dijkstra(graph, neg_edges, tent_dist)
+        tent_dist = dijkstra(graph, neg_edges, tent_dist, [])
         for v in graph.keys():
             if tent_dist[v][0] < distances1[v]:
                 raise NegativeCycleError
