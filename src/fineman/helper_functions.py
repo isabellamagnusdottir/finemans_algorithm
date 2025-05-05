@@ -7,9 +7,10 @@ from src.utils import NegativeCycleError
 def dijkstra(graph: dict[int, dict[int, float]], neg_edges: set, dist: list, pq, I_prime = None, parent = None, anc_in_I=None, save_source = False):
 
     for v in graph.keys():
-        dist[v][0] = min(dist[v][0], dist[v][1])
-        dist[v][1] = inf
-        heapq.heappush(pq, (dist[v][0], v))
+        if (dist[v][0] > dist[v][1]):
+            dist[v][0] = dist[v][1]
+            dist[v][1] = inf
+            heapq.heappush(pq, (dist[v][0], v))
 
     while pq:
         current_dist, u = heapq.heappop(pq)
@@ -43,9 +44,10 @@ def bellman_ford(graph : dict[int, dict[int, float]], neg_edges: set, dist: list
     return dist
 
 
-def bfd_save_rounds(graph, neg_edges, dist: list, beta: int):
+def bfd_save_rounds(super_source, graph, neg_edges, dist: list, beta: int):
     pq = []
-    dist = dijkstra(graph, neg_edges, dist, pq)
+    heapq.heappush(pq,(dist[super_source][0],super_source))
+    dist = dijkstra(graph, neg_edges, dist,pq)
     rounds = [[dist[v][0] for v in graph.keys()]]
     for _ in range(beta):
         dist = bellman_ford(graph,neg_edges,dist)
@@ -57,6 +59,7 @@ def h_hop_sssp(source, graph: dict[int, dict[int, float]], neg_edges: set, h: in
     dist = [[inf,inf] for _ in range(len(graph))]
     dist[source][0] = 0
     pq = []
+    heapq.heappush(pq,(dist[source][0],source))
 
     dist = dijkstra(graph, neg_edges, dist, pq, I_prime, parent, anc_in_I, save_source)
     for _ in range(h):
@@ -234,7 +237,6 @@ def super_source_bfd_save_rounds(graph, neg_edges, subset, h: int):
 
     dist = [[inf,inf] for _ in range(len(graph))]
     dist[super_source][0] = 0
-
-    dists = bfd_save_rounds(graph, neg_edges, dist, h)
+    dists = bfd_save_rounds(super_source, graph, neg_edges, dist, h)
     del graph[super_source]
     return [lst[:-1] for lst in dists]

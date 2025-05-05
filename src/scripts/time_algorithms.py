@@ -15,6 +15,7 @@ from pstats import SortKey
 import numpy as np
 import csv
 import time
+import random as rand
 
 GRAPHS_PATH = "src/tests/test_data/synthetic_graphs/"
 SPECIAL_CASES = {"watts-strogatz","random-no-neg-cycles-2","random-no-neg-cycles-1"}
@@ -64,18 +65,23 @@ def time_algorithms():
         while count <= 24:
             print(count)
             try:
-                bford_start_time = time.time()
-                result1 = standard_bellman_ford(graph,0,True)
-                bford_end_time = time.time()
+                bford_graph = graph.copy()
+                if rand.random() > 0.5:
+                    fineman_start_time = time.time()
+                    result2 = fineman(graph,0)
+                    fineman_end_time = time.time()
 
-                fineman_start_time = time.time()
-                result2 = fineman(graph,0)
-                fineman_end_time = time.time()
+                    bford_start_time = time.time()
+                    result1 = standard_bellman_ford(bford_graph,0,False)
+                    bford_end_time = time.time()
+                else:
+                    bford_start_time = time.time()
+                    result1 = standard_bellman_ford(bford_graph,0,False)
+                    bford_end_time = time.time()
 
-                assert result1 == result2
-
-                bellmanford_times.append(bford_end_time-bford_start_time)
-                fineman_times.append(fineman_end_time-fineman_start_time)
+                    fineman_start_time = time.time()
+                    result2 = fineman(graph,0)
+                    fineman_end_time = time.time()
 
                 graph = load_new_graph(graph_info)
                 count += 1
@@ -83,6 +89,12 @@ def time_algorithms():
                 print(NegativeCycleError)
                 graph = load_new_graph(graph_info)
                 continue
+
+
+            assert np.allclose(result1, result2, rtol=1e-7, atol=1e-9)
+
+            bellmanford_times.append(bford_end_time-bford_start_time)
+            fineman_times.append(fineman_end_time-fineman_start_time)
 
         bellmanford_time = np.mean(bellmanford_times[4:])
         fineman_time = np.mean(fineman_times[4:])
