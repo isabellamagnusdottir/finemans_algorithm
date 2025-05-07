@@ -1,29 +1,28 @@
-from queue import PriorityQueue
 from numpy import nan,inf
+import heapq
 
 from src.utils import NegativeCycleError
 
 
-def dijkstra(graph: dict[int, dict[int, float]], neg_edges: set, dist: list, I_prime = None, parent = None, anc_in_I=None, save_source = False):
-
-    pq = PriorityQueue()
+def dijkstra(graph: dict[int, dict[int, float]], neg_edges: set, dist: list, pq, I_prime = None, parent = None, anc_in_I=None, save_source = False):
 
     for v in graph.keys():
-        dist[v][0] = min(dist[v][0],dist[v][1])
+        dist[v][0] = min(dist[v][0], dist[v][1])
         dist[v][1] = inf
-        pq.put((dist[v][0], v))
+        heapq.heappush(pq, (dist[v][0], v))
 
-    while not pq.empty():
-        current_dist, u = pq.get()
+    while pq:
+        current_dist, u = heapq.heappop(pq)
+
         if current_dist > dist[u][0]:
             continue
         for v in graph[u]:
             if (u,v) in neg_edges:
                 continue
-            alt_dist = dist[u][0]+graph[u][v]
+            alt_dist = dist[u][0] + graph[u][v]
             if alt_dist < dist[v][0]:
                 dist[v][0] = alt_dist
-                pq.put((alt_dist,v))
+                heapq.heappush(pq, (alt_dist, v))
 
                 if save_source:
                     _compute_ancestor_parent(parent, anc_in_I, I_prime, u,v, len(graph))
@@ -37,37 +36,37 @@ def bellman_ford(graph : dict[int, dict[int, float]], neg_edges: set, dist: list
 
         if alt_dist < dist[v][0]:
             dist[v][1] = min(alt_dist, dist[v][1])
+
             if save_source:
                 _compute_ancestor_parent(parent, anc_in_I, I_prime, u,v, len(graph))
 
     return dist
 
-def bfd(graph, neg_edges, dist: list, beta: int, I_prime = None,parent=None, anc_in_I=None,save_source = False):
-    dist = dijkstra(graph, neg_edges, dist, I_prime, parent, anc_in_I, save_source)
-    for _ in range(beta):
-        dist = bellman_ford(graph, neg_edges, dist, I_prime, parent, anc_in_I, save_source)
-        dist = dijkstra(graph, neg_edges, dist, I_prime, parent, anc_in_I, save_source)
-    return [dist[v][0] for v in range(len(graph))]
 
 def bfd_save_rounds(graph, neg_edges, dist: list, beta: int):
-    dist = dijkstra(graph, neg_edges, dist)
+    pq = []
+    dist = dijkstra(graph, neg_edges, dist, pq)
     rounds = [[dist[v][0] for v in graph.keys()]]
     for _ in range(beta):
-        # TODO: find fix to avoid copying the rounds.
         dist = bellman_ford(graph,neg_edges,dist)
-        dist = dijkstra(graph, neg_edges, dist)
+        dist = dijkstra(graph, neg_edges, dist, pq)
         rounds.append([dist[v][0] for v in range(len(graph))])
     return rounds
 
-def b_hop_sssp(source, graph: dict[int, dict[int, float]], neg_edges: set, beta, I_prime=None,parent=None,anc_in_I=None,save_source=False):
+def h_hop_sssp(source, graph: dict[int, dict[int, float]], neg_edges: set, h: int, I_prime=None, parent=None, anc_in_I=None, save_source=False):
     dist = [[inf,inf] for _ in range(len(graph))]
     dist[source][0] = 0
+    pq = []
 
-    return bfd(graph, neg_edges, dist, beta, I_prime,parent,anc_in_I, save_source)
+    dist = dijkstra(graph, neg_edges, dist, pq, I_prime, parent, anc_in_I, save_source)
+    for _ in range(h):
+        dist = bellman_ford(graph, neg_edges, dist, I_prime, parent, anc_in_I, save_source)
+        dist = dijkstra(graph, neg_edges, dist, pq, I_prime, parent, anc_in_I, save_source)
+    return [dist[v][0] for v in range(len(graph))]
 
-def b_hop_stsp(target, graph: dict[int, dict[int, float]], beta):
+def h_hop_stsp(target, graph: dict[int, dict[int, float]], h: int):
     t_graph, t_neg_edges = transpose_graph(graph)
-    return b_hop_sssp(target, t_graph, t_neg_edges, beta)
+    return h_hop_sssp(target, t_graph, t_neg_edges, h)
 
 def transpose_graph(graph: dict[int, dict[int, float]]):
     t_graph = {}
@@ -98,7 +97,7 @@ def _subset_bfd(graph, neg_edges, subset, beta,I_prime=None,save_source=False):
     for v in subset:
         graph[super_source][v] = 0
 
-    distances = b_hop_sssp(super_source, graph, neg_edges, beta,I_prime,parent,anc_in_I,save_source)
+    distances = h_hop_sssp(super_source, graph, neg_edges, beta, I_prime, parent, anc_in_I, save_source)
     del graph[super_source]
     if save_source:
         for i in I_prime:
@@ -106,16 +105,16 @@ def _subset_bfd(graph, neg_edges, subset, beta,I_prime=None,save_source=False):
                 raise NegativeCycleError
     return distances
 
-def subset_bfd(graph, neg_edges, subset, beta: int, I_prime=None, save_source=False):
-    return _subset_bfd(graph,neg_edges,subset,beta,I_prime,save_source)[:-1]
+def subset_bfd(graph, neg_edges, subset, h: int, I_prime=None, save_source=False):
+    return _subset_bfd(graph, neg_edges, subset, h, I_prime, save_source)[:-1]
 
 
-def super_source_bfd(graph: dict[int, dict[int, float]], neg_edges: set, beta, cycleDetection = False):
-    distances1 = _subset_bfd(graph,neg_edges,graph.keys(),beta)
+def super_source_bfd(graph: dict[int, dict[int, float]], neg_edges: set, h: int, cycleDetection = False):
+    distances1 = _subset_bfd(graph, neg_edges, graph.keys(), h)
     if cycleDetection:
         tent_dist = [[distance,inf] for distance in distances1]
         tent_dist = bellman_ford(graph, neg_edges, tent_dist)
-        tent_dist = dijkstra(graph, neg_edges, tent_dist)
+        tent_dist = dijkstra(graph, neg_edges, tent_dist, [])
         for v in graph.keys():
             if tent_dist[v][0] < distances1[v]:
                 raise NegativeCycleError
@@ -133,17 +132,17 @@ def get_set_of_neg_vertices(graph: dict[int, dict[int, float]]):
     return neg_vertices
 
 
-def find_betweenness_set(source, target, graph, neg_edges, beta):
-    dist1 = b_hop_sssp(source,graph,neg_edges,beta)
-    dist2 = b_hop_stsp(target,graph,beta)
+def find_betweenness_set(source, target, graph, neg_edges, h: int):
+    dist1 = h_hop_sssp(source, graph, neg_edges, h)
+    dist2 = h_hop_stsp(target, graph, h)
     between = set()
     for x in graph.keys():
         if dist1[x]+dist2[x] < 0:
             between.add(x)
     return between
 
-def betweenness(source, target, graph, neg_edges, beta):
-    return len(find_betweenness_set(source,target,graph,neg_edges,beta))
+def betweenness(source, target, graph, neg_edges, h: int):
+    return len(find_betweenness_set(source, target, graph, neg_edges, h))
 
 
 def reweight_graph_and_composes_price_functions(graph: dict[int, dict[int, float]], new_price_function: list[int], with_transpose = False):
@@ -211,8 +210,8 @@ def reweight_graph_and_get_price_functions(graph, new_price_function, existing):
 
     return new_graph, new_neg_edges, negative_vertices, existing
 
-def compute_reach(graph,neg_edges,subset,h):
-    d = subset_bfd(graph,neg_edges,subset,h)
+def compute_reach(graph, neg_edges, subset, h):
+    d = subset_bfd(graph, neg_edges, subset, h)
     return {v for v in graph.keys() if d[v] < 0}
 
 # TODO: Non-Functional - missing edge cases (and therefore likely some trivial cases)
@@ -226,7 +225,7 @@ def _compute_ancestor_parent(parent, anc_in_I, I_prime, u: int,v: int, super_sou
     else:
         anc_in_I[v] = anc_in_I[parent[v]]
 
-def super_source_bfd_save_rounds(graph, neg_edges, subset, beta):
+def super_source_bfd_save_rounds(graph, neg_edges, subset, h: int):
     super_source = len(graph)
     graph[super_source] = {}
     for v in subset:
@@ -236,6 +235,6 @@ def super_source_bfd_save_rounds(graph, neg_edges, subset, beta):
     dist = [[inf,inf] for _ in range(len(graph))]
     dist[super_source][0] = 0
 
-    dists = bfd_save_rounds(graph, neg_edges, dist, beta)
+    dists = bfd_save_rounds(graph, neg_edges, dist, h)
     del graph[super_source]
     return [lst[:-1] for lst in dists]

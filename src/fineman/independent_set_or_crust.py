@@ -17,7 +17,7 @@ def find_is_or_crust(graph, neg_edges, negative_subset, c, c_prime, seed = None)
         y = rand.choice(tuple(H))
         #TODO: Consider if we want to strictly extract the transpose graph here as we will
         # be working with the transpose graph after if we succeed in finding large enough set
-        dist = b_hop_stsp(y, graph,1)
+        dist = h_hop_stsp(y, graph, 1)
         U = {u for u in negative_subset if dist[u] < 0}
         if len(U) < (1/8)*k_hat/rho:
             new_seed = (int(time.time()*1000))

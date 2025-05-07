@@ -2,8 +2,8 @@ from math import ceil
 
 from src.fineman.betweenness_reduction import betweenness_reduction
 from src.fineman.elimination_by_hop_reduction import elimination_of_r_remote_edges_by_hop_reduction
-from src.fineman.helper_functions import super_source_bfd, compute_reach, transpose_graph, b_hop_sssp, \
-    b_hop_stsp, reweight_graph_and_composes_price_functions
+from src.fineman.helper_functions import super_source_bfd, compute_reach, transpose_graph, h_hop_sssp, \
+    h_hop_stsp, reweight_graph_and_composes_price_functions
 from src.fineman.independent_set_or_crust import find_is_or_crust
 
 
@@ -18,8 +18,8 @@ def _compute_price_function_to_make_U_r_remote(graph, neg_edges, negative_sandwi
     (x,U,y) = negative_sandwich
     phi = [0] * len(graph)
 
-    dists_from_x = b_hop_sssp(x, graph, neg_edges, beta)
-    dists_to_y = b_hop_stsp(y, graph, beta)
+    dists_from_x = h_hop_sssp(x, graph, neg_edges, beta)
+    dists_to_y = h_hop_stsp(y, graph, beta)
 
     for v in graph.keys():
         phi[v] = min(0, max(dists_from_x[v], -(dists_to_y[v])))
