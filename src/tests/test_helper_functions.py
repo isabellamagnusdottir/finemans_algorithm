@@ -121,7 +121,7 @@ def test_bellman_ford_implementation(filename, expected):
 def test_beta_hop_sssp_implementation(filename, beta, expected):
     graph, neg_edges = load_test_case(TESTDATA_FILEPATH + filename)
 
-    dist = b_hop_sssp(0, graph, neg_edges, beta)
+    dist = h_hop_sssp(0, graph, neg_edges, beta)
     assert dist == expected
 
 
@@ -149,7 +149,7 @@ def test_beta_hop_sssp_implementation(filename, beta, expected):
 def test_beta_hop_stsp_implementation(filename, beta, expected):
     graph, _ = load_test_case(TESTDATA_FILEPATH + filename)
 
-    dist = b_hop_stsp(len(graph.keys())-1, graph, beta)
+    dist = h_hop_stsp(len(graph.keys()) - 1, graph, beta)
     assert dist == expected
 
 
