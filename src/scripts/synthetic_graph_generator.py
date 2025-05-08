@@ -1,3 +1,4 @@
+from decimal import Decimal
 import json
 import random as rand
 import re
@@ -8,8 +9,10 @@ from networkx.classes import DiGraph
 
 def _get_weight(weights):
     if rand.choices([True, False], weights)[0]:
-        return round(rand.uniform(0.0, 30.0), 2)
-    return round(rand.uniform(-10.0, -1.0), 2)
+        rand_int = rand.randint(0,30000)
+        return Decimal(rand_int) / Decimal('1000')
+    rand_int = rand.randint(-10000,-1000)
+    return Decimal(rand_int) / Decimal(1000)
 
 
 def _graph_to_json(graph: DiGraph, weights):
@@ -20,7 +23,7 @@ def _graph_to_json(graph: DiGraph, weights):
             graph_data[str(u)] = []
         if u in graph.nodes:
             for v in graph.neighbors(u):
-                graph_data[str(u)].append([v, _get_weight(weights)])
+                graph_data[str(u)].append([v, str(_get_weight(weights))])
 
     return graph_data
 

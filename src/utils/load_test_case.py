@@ -1,3 +1,4 @@
+from decimal import Decimal
 import json
 import os
 from collections import deque
@@ -47,6 +48,7 @@ def load_test_case(path: str, only_cc = False) -> tuple[dict[int, dict[int, floa
             graph[vertex] = {}
 
         for neighbor, weight in v:
+            weight = Decimal(weight)
             graph[vertex][neighbor] = weight
 
             if weight < 0.0:
