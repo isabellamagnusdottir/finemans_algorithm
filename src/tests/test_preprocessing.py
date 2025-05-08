@@ -1,7 +1,9 @@
 import pytest
 from src.fineman.preprocessing import *
 from src.utils.load_test_case import load_test_case
+from src.weight_type import WEIGHT_TYPE
 
+WEIGHT_TYPE = float
 TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
 
 

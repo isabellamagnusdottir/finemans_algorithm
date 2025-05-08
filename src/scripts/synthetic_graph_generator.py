@@ -1,15 +1,32 @@
+import argparse
+from decimal import Decimal
 import json
 import random as rand
 import re
 
 import networkx as nx
 from networkx.classes import DiGraph
+from src.weight_type import WEIGHT_TYPE,types
+
 
 
 def _get_weight(weights):
     if rand.choices([True, False], weights)[0]:
-        return round(rand.uniform(0.0, 30.0), 2)
-    return round(rand.uniform(-10.0, -1.0), 2)
+        if WEIGHT_TYPE == Decimal:
+            rand_int = rand.randint(0,30000)
+            return Decimal(rand_int) / Decimal('1000')
+        elif WEIGHT_TYPE == int:
+            return rand.randint(0,30)
+        else:
+            return round(rand.uniform(0.0, 30.0), 2)
+    if WEIGHT_TYPE == Decimal:
+        rand_int = rand.randint(-10000,-1000)
+        return Decimal(rand_int) / Decimal(1000)
+    elif WEIGHT_TYPE == int:
+        return rand.randint(-10,-1)
+    else:
+        return round(rand.uniform(-10.0, -1.0), 2)
+
 
 
 def _graph_to_json(graph: DiGraph, weights):
@@ -20,7 +37,7 @@ def _graph_to_json(graph: DiGraph, weights):
             graph_data[str(u)] = []
         if u in graph.nodes:
             for v in graph.neighbors(u):
-                graph_data[str(u)].append([v, _get_weight(weights)])
+                graph_data[str(u)].append([v, str(_get_weight(weights))])
 
     return graph_data
 
@@ -66,7 +83,7 @@ def _generate_single_grid_graph(size):
     return nx.relabel_nodes(grid, mapping)
 
 
-def single_graph_generator(graph_family: str, no_of_vertices: int, ratio: tuple[float, float], **kwargs):
+def single_graph_generator( graph_family: str, no_of_vertices: int, ratio: tuple[float, float], **kwargs):
     filename = ""
 
     match graph_family:
@@ -114,30 +131,31 @@ def single_graph_generator(graph_family: str, no_of_vertices: int, ratio: tuple[
     return filename
 
 
-def generate_multiple_graphs(family: str, no_of_vertices, ratios):
+def generate_multiple_graphs( family: str, no_of_vertices, ratios):
     for num in no_of_vertices:
         for r in ratios:
             single_graph_generator(family, num, r)
 
-def generate_multiple_grids(no_of_vertices, ratios):
+def generate_multiple_grids( no_of_vertices, ratios):
     for num in no_of_vertices:
         for r in ratios:
             single_graph_generator("grid", num, r)
 
-def generate_multiple_random_graphs(no_of_vertices, ratios, scalars):
+def generate_multiple_random_graphs( no_of_vertices, ratios, scalars):
     for num in no_of_vertices:
         for r in ratios:
             for s in scalars:
                 single_graph_generator("random", num, r, scalar=s)
 
-def generate_multiple_watts_strogatz_graphs(no_of_vertices, ratios, ks, ps):
+def generate_multiple_watts_strogatz_graphs( no_of_vertices, ratios, ks, ps):
     for num in no_of_vertices:
         for r in ratios:
             for k in ks:
                 for p in ps:
                     single_graph_generator("watts-strogatz", num, r, k=k, p=p)
 
-def main():
+def main(type):
+    WEIGHT_TYPE = type
     # PATHS, CYCLES, TREES, COMPLETE GRAPHS
     families_of_graphs = ["path", "cycle", "random-tree", "complete"]
     no_of_vertices = [10, 50, 100, 200, 500, 750, 1000]
@@ -165,4 +183,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Data type of edge weights")
+    parser.add_argument("type", type=str, default="int", help="Data type to use: int, float or decimal")
+    args = parser.parse_args()
+    main(types[args.type])
