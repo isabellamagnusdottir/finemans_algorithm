@@ -77,8 +77,9 @@ def test_dijkstra_implementation(filename, expected):
 
     initial_dist = [[inf,inf] for _ in range(len(graph))]
     initial_dist[0][0] = 0
-
-    dist = dijkstra(graph, neg_edges, initial_dist, [])
+    pq = []
+    heapq.heappush(pq,(initial_dist[0][0],0))
+    dist = dijkstra(graph, neg_edges, initial_dist, pq)
     assert [dist[v][0] for v in range(len(graph))] == expected
 
 
