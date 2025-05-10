@@ -2,8 +2,10 @@ import pytest
 from numpy import inf
 from src.fineman.helper_functions import *
 from src.utils.load_test_case import load_test_case
+from src.weight_type import WEIGHT_TYPE
 
 TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
+WEIGHT_TYPE = float
 
 @pytest.mark.parametrize("filename", [
     "complete_4_vertices_graph_with_no_neg_edges.json",
@@ -16,6 +18,7 @@ TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
     "path_with_only_neg_edges.json"
 ])
 def test_transpose_graph_on_multiple_graphs(filename):
+    
     graph, _ = load_test_case(TESTDATA_FILEPATH + filename)
 
     transposed_graph, _ = transpose_graph(graph)

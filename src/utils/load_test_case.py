@@ -2,6 +2,7 @@ from decimal import Decimal
 import json
 import os
 from collections import deque
+from src.weight_type import WEIGHT_TYPE
 
 def _find_connected_component_to_source(graph, source: int):
     mapping = {}
@@ -48,7 +49,12 @@ def load_test_case(path: str, only_cc = False) -> tuple[dict[int, dict[int, floa
             graph[vertex] = {}
 
         for neighbor, weight in v:
-            weight = Decimal(weight)
+            if WEIGHT_TYPE == Decimal:
+                weight = Decimal(weight)
+            elif WEIGHT_TYPE == float:
+                weight = float(weight)
+            else:
+                weight = int(weight)
             graph[vertex][neighbor] = weight
 
             if weight < 0.0:

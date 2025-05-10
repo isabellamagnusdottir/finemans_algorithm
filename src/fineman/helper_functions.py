@@ -3,6 +3,7 @@ from numpy import nan,inf
 import heapq
 
 from src.utils import NegativeCycleError
+from src.weight_type import WEIGHT_TYPE
 
 
 def dijkstra(graph, neg_edges: set, dist: list, pq, I_prime = None, parent = None, anc_in_I=None, save_source = False):
@@ -10,7 +11,10 @@ def dijkstra(graph, neg_edges: set, dist: list, pq, I_prime = None, parent = Non
     for v in graph.keys():
         if (dist[v][0] > dist[v][1]):
             dist[v][0] = dist[v][1]
-            dist[v][1] = Decimal('Infinity')
+            if WEIGHT_TYPE == Decimal:
+                dist[v][1] = Decimal('Infinity')
+            else:
+                dist[v][1] = inf
             heapq.heappush(pq, (dist[v][0], v))
 
     while pq:
@@ -57,8 +61,13 @@ def bfd_save_rounds(super_source, graph, neg_edges, dist: list, beta: int):
     return rounds
 
 def h_hop_sssp(source, graph, neg_edges: set, h: int, I_prime=None, parent=None, anc_in_I=None, save_source=False):
-    dist = [[Decimal('Infinity'),Decimal('Infinity')] for _ in range(len(graph))]
-    dist[source][0] = Decimal(0)
+    if WEIGHT_TYPE == Decimal:
+        dist = [[Decimal('Infinity'),Decimal('Infinity')] for _ in range(len(graph))]
+        dist[source][0] = Decimal(0)
+    else:
+        dist = [[inf,inf] for _ in range(len(graph))]
+        dist[source][0] = 0
+        
     pq = []
     heapq.heappush(pq,(dist[source][0],source))
     dist = dijkstra(graph, neg_edges, dist, pq, I_prime, parent, anc_in_I, save_source)
@@ -115,7 +124,10 @@ def subset_bfd(graph, neg_edges, subset, h: int, I_prime=None, save_source=False
 def super_source_bfd(graph, neg_edges: set, h: int, cycleDetection = False):
     distances1 = _subset_bfd(graph, neg_edges, graph.keys(), h)
     if cycleDetection:
-        tent_dist = [[distance,Decimal('Infinity')] for distance in distances1]
+        if WEIGHT_TYPE == Decimal:
+            tent_dist = [[distance,Decimal('Infinity')] for distance in distances1]
+        else:
+            tent_dist = [[distance,inf] for distance in distances1]
         tent_dist = bellman_ford(graph, neg_edges, tent_dist)
         tent_dist = dijkstra(graph, neg_edges, tent_dist, [])
         for v in graph.keys():
@@ -235,8 +247,12 @@ def super_source_bfd_save_rounds(graph, neg_edges, subset, h: int):
         if v != super_source:
             graph[super_source][v] = 0
 
-    dist = [[Decimal('Infinity'),Decimal('Infinity')] for _ in range(len(graph))]
-    dist[super_source][0] = 0
+    if WEIGHT_TYPE == Decimal:
+        dist = [[Decimal('Infinity'),Decimal('Infinity')] for _ in range(len(graph))]
+        dist[super_source][0] = Decimal(0)
+    else:
+        dist = [[inf,inf] for _ in range(len(graph))]
+        dist[super_source][0] = 0
     dists = bfd_save_rounds(super_source, graph, neg_edges, dist, h)
     del graph[super_source]
     return [lst[:-1] for lst in dists]

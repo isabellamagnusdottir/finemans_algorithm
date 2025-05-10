@@ -4,9 +4,10 @@ from math import log2
 from src.fineman import preprocess_graph
 from src.fineman.dijkstra import dijkstra
 from src.fineman.elimination_algorithm import elimination_algorithm
+from src.weight_type import WEIGHT_TYPE
 
-def fineman(graph: dict[int, dict[int, float]], source: int, seed = None):
-
+def fineman(graph, source: int, seed = None, type = int):
+    WEIGHT_TYPE = type
     if seed is not None: rand.seed(seed)
 
     org_n = len(graph.keys())

@@ -1,3 +1,4 @@
+import argparse
 import json
 import re
 import random as rand
@@ -5,6 +6,8 @@ import networkx as nx
 from src.scripts.synthetic_graph_generator import _get_weight
 from src.scripts.bellman_ford import standard_bellman_ford
 from src.utils.cycle_error import NegativeCycleError
+from src.weight_type import types
+
 
 def _swap_sign_of_neg_edge_in_cycle(graph, cycle):
     u = rand.choice(cycle)
@@ -106,7 +109,8 @@ def generate_random_no_neg_cycles_graph_2(n,scalar,ratio: tuple[float,float]):
     return filename
 
 
-def main():
+def main(type):
+    WEIGHT_TYPE = types[type]
     sizes = [10, 50, 100, 200, 500, 750, 1000]
     scalars = [3, 5, 6, 9]
     ratios = [(0.9, 0.1), (0.8, 0.2), (0.66, 0.34), (0.5, 0.5), (0.2, 0.8), (0.0, 1.0)]
@@ -117,4 +121,7 @@ def main():
                 generate_random_no_neg_cycles_graph_2(num,scalar,ratio)
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description="Data type of edge weights")
+    parser.add_argument("type", type=str, default="int", help="Data type to use: int, float or decimal")
+    args = parser.parse_args()
+    main(types[args.type])
