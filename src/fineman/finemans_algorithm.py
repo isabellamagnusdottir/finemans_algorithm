@@ -6,7 +6,7 @@ from src.fineman.dijkstra import dijkstra
 from src.fineman.elimination_algorithm import elimination_algorithm
 from src.weight_type import WEIGHT_TYPE
 
-def fineman(graph, source: int, seed = None, type = int):
+def fineman(graph, source: int, seed = None, type = float):
     WEIGHT_TYPE = type
     if seed is not None: rand.seed(seed)
 
