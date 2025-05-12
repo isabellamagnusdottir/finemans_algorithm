@@ -24,7 +24,7 @@ def fineman(graph: dict[int, dict[int, float]], source: int, seed = None):
         for _ in range(int(k**(2/3))):
             graph, neg_edges, _ = elimination_algorithm(graph, neg_edges)
 
-            if len(neg_edges) == 0: break
+            if len(neg_edges) == 0: return dijkstra(graph, source, org_graph)[:org_n]
 
     distances = dijkstra(graph, source, org_graph)[:org_n]
 
