@@ -83,7 +83,7 @@ def time_algorithms():
                     result2 = fineman(graph,0)
                     fineman_end_time = time.time()
 
-                    assert result1 == result2
+                    assert np.allclose(result1, result2, atol=1e-9)
 
                 graph = load_new_graph(graph_info)
                 count += 1

@@ -15,7 +15,7 @@ time:
 visualize:
 	poetry run python -m src.scripts.visualize_times
 
-TYPE ?= int
+TYPE ?= float
 
 generate-graphs:
 	poetry run python -m src.scripts.synthetic_graph_generator $(TYPE)
