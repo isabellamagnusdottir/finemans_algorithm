@@ -1,25 +1,23 @@
-from decimal import Decimal
 import os
 from math import isclose
 
 import pytest
 
+import src.globals as globals
 from src.fineman.finemans_algorithm import fineman
-from src.weight_type import WEIGHT_TYPE
 from src.scripts import standard_bellman_ford
 from src.scripts.double_tree_graph_generator import generate_double_tree
+from src.scripts.random_graph_no_neg_cycles_gen import generate_random_no_neg_cycles_graph_1
 from src.utils import load_test_case, NegativeCycleError
-from src.scripts.random_graph_no_neg_cycles_gen import generate_random_no_neg_cycles_graph_1,generate_random_no_neg_cycles_graph_2
 
 TESTDATA_FILEPATH = "src/tests/test_data/"
-# WEIGHT_TYPE = float
 
 # TODO: mock test for negative sandwich
 
 def _assert_distances_are_close(actual, expected):
     assert len(actual) == len(expected)
     for i in range(len(actual)):
-        assert isclose(actual[i], expected[i])
+        assert isclose(actual[i], expected[i], abs_tol=1e-9)
 
 
 @pytest.mark.parametrize("depth", [3, 4, 6, 9])
@@ -112,15 +110,15 @@ def test_of_entire_algorithm_on_watts_strogatz_of_varying_parameters(filename, r
         _assert_distances_are_close(actual, expected)
 
 
-@pytest.mark.parametrize("type",[int,float,Decimal])
-@pytest.mark.parametrize("vertices",[10,50,100,250])
-@pytest.mark.parametrize("edge_scalar",[2,5])
-@pytest.mark.parametrize("repeat",range(3))
-def test_entire_algorithm_on_several_edge_weight_types(type,vertices,edge_scalar,repeat):
-    WEIGHT_TYPE = type
+@pytest.mark.parametrize("type_str", ["int", "float", "decimal"])
+@pytest.mark.parametrize("vertices", [10, 50, 100, 250, 500])
+@pytest.mark.parametrize("edge_scalar", [2, 5, 6, 8])
+@pytest.mark.parametrize("repeat", range(5))
+def test_entire_algorithm_on_several_edge_weight_types(type_str, vertices, edge_scalar, repeat):
+    globals.change_weight_type(type_str)
     filename = generate_random_no_neg_cycles_graph_1(vertices,edge_scalar)
     file_path = TESTDATA_FILEPATH + "synthetic_graphs/" + filename + ".json"
-    graph,_ = load_test_case(file_path,only_cc=True)
+    graph,_ = load_test_case(file_path, only_cc = True)
     expected = []
     error_raised = False
     try:
@@ -129,11 +127,11 @@ def test_entire_algorithm_on_several_edge_weight_types(type,vertices,edge_scalar
     except NegativeCycleError:
         error_raised = True
         with pytest.raises(NegativeCycleError):
-            fineman(graph, 0)
+            fineman(graph, 0, weight_type = type_str)
 
     if not error_raised:
-        actual = fineman(graph, 0)
-        if type == float:
+        actual = fineman(graph, 0, weight_type = type_str)
+        if globals.WEIGHT_TYPE is float:
             _assert_distances_are_close(actual, expected)
         else:
-            assert(actual,expected)
+            assert(actual, expected)

@@ -1,9 +1,7 @@
 import pytest
 from src.fineman import rand_is
 from src.utils.load_test_case import load_test_case
-from src.weight_type import WEIGHT_TYPE
 
-WEIGHT_TYPE = float
 TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
 
 @pytest.mark.parametrize("repeat", range(10))  # Repeat 10 times

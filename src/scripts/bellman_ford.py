@@ -1,4 +1,6 @@
 from numpy import inf
+import src.globals as globals
+from math import isclose
 
 from src.utils.cycle_error import NegativeCycleError
 
@@ -17,6 +19,8 @@ def standard_bellman_ford(graph: dict[int, dict[int, float]], source: int, with_
     for u,neighborhood in graph.items():
         for v in neighborhood.keys():
             if dist[u] + graph[u][v] < dist[v]:
+                if globals.WEIGHT_TYPE is float and isclose(dist[u] + graph[u][v], dist[v], abs_tol=1e-9):
+                    continue
                 # TODO: Consider implementing finding the negative cycle using
                 # a predecessor array.
                 if with_parent:

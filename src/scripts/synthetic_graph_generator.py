@@ -6,27 +6,22 @@ import re
 
 import networkx as nx
 from networkx.classes import DiGraph
-from src.weight_type import WEIGHT_TYPE,types
+import src.globals as globals
 
 
 
 def _get_weight(weights):
-    if rand.choices([True, False], weights)[0]:
-        if WEIGHT_TYPE == Decimal:
-            rand_int = rand.randint(0,30000)
-            return Decimal(rand_int) / Decimal('1000')
-        elif WEIGHT_TYPE == int:
-            return rand.randint(0,30)
-        else:
-            return round(rand.uniform(0.0, 30.0), 2)
-    if WEIGHT_TYPE == Decimal:
-        rand_int = rand.randint(-10000,-1000)
+    is_pos = rand.choices([True, False], weights)[0]
+    if globals.WEIGHT_TYPE is Decimal:
+        start, end = (0, 30_000) if is_pos else (-10_000, -1000)
+        rand_int = rand.randint(start, end)
         return Decimal(rand_int) / Decimal(1000)
-    elif WEIGHT_TYPE == int:
-        return rand.randint(-10,-1)
+    elif globals.WEIGHT_TYPE is float:
+        start, end = (0.0, 30.0) if is_pos else (-10.0, -0.01)
+        return round(rand.uniform(start, end), 2)
     else:
-        return round(rand.uniform(-10.0, -1.0), 2)
-
+        start, end = (0, 30) if is_pos else (-10, -1)
+        return rand.randint(start, end)
 
 
 def _graph_to_json(graph: DiGraph, weights):
@@ -46,7 +41,9 @@ def _save_graph_json(graph: DiGraph, weights, filename: str):
     json_data = _graph_to_json(graph, weights)
     with open("src/tests/test_data/synthetic_graphs/" + filename + ".json", 'w') as f:
         json_str = json.dumps(json_data, indent=2)
-        json_str = re.sub(r'\[\n\s*(\d+),\n\s*(-?\d+(\.\d+)?)\n\s*\]', r'[\1,\2]', json_str)
+        json_str = re.sub(r'\[\s*\n\s*(\d+),\s*\n\s*("?-?\d+(?:\.\d+)?")\s*\n\s*\]',
+                          r'[\1, \2]',
+                          json_str)
         f.write(json_str)
 
 
@@ -83,7 +80,7 @@ def _generate_single_grid_graph(size):
     return nx.relabel_nodes(grid, mapping)
 
 
-def single_graph_generator( graph_family: str, no_of_vertices: int, ratio: tuple[float, float], **kwargs):
+def single_graph_generator(graph_family: str, no_of_vertices: int, ratio: tuple[float, float], **kwargs):
     filename = ""
 
     match graph_family:
@@ -131,23 +128,23 @@ def single_graph_generator( graph_family: str, no_of_vertices: int, ratio: tuple
     return filename
 
 
-def generate_multiple_graphs( family: str, no_of_vertices, ratios):
+def generate_multiple_graphs(family: str, no_of_vertices, ratios):
     for num in no_of_vertices:
         for r in ratios:
             single_graph_generator(family, num, r)
 
-def generate_multiple_grids( no_of_vertices, ratios):
+def generate_multiple_grids(no_of_vertices, ratios):
     for num in no_of_vertices:
         for r in ratios:
             single_graph_generator("grid", num, r)
 
-def generate_multiple_random_graphs( no_of_vertices, ratios, scalars):
+def generate_multiple_random_graphs(no_of_vertices, ratios, scalars):
     for num in no_of_vertices:
         for r in ratios:
             for s in scalars:
                 single_graph_generator("random", num, r, scalar=s)
 
-def generate_multiple_watts_strogatz_graphs( no_of_vertices, ratios, ks, ps):
+def generate_multiple_watts_strogatz_graphs(no_of_vertices, ratios, ks, ps):
     for num in no_of_vertices:
         for r in ratios:
             for k in ks:
@@ -155,7 +152,7 @@ def generate_multiple_watts_strogatz_graphs( no_of_vertices, ratios, ks, ps):
                     single_graph_generator("watts-strogatz", num, r, k=k, p=p)
 
 def main(type):
-    WEIGHT_TYPE = type
+    globals.change_weight_type(type)
     # PATHS, CYCLES, TREES, COMPLETE GRAPHS
     families_of_graphs = ["path", "cycle", "random-tree", "complete"]
     no_of_vertices = [10, 50, 100, 200, 500, 750, 1000]
@@ -186,4 +183,4 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Data type of edge weights")
     parser.add_argument("type", type=str, default="int", help="Data type to use: int, float or decimal")
     args = parser.parse_args()
-    main(types[args.type])
+    main(globals.types[args.type])

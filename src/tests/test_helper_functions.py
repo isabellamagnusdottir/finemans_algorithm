@@ -2,10 +2,9 @@ import pytest
 from numpy import inf
 from src.fineman.helper_functions import *
 from src.utils.load_test_case import load_test_case
-from src.weight_type import WEIGHT_TYPE
+from src.globals import WEIGHT_TYPE
 
 TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
-WEIGHT_TYPE = float
 
 @pytest.mark.parametrize("filename", [
     "complete_4_vertices_graph_with_no_neg_edges.json",

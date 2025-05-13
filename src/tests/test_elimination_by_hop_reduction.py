@@ -2,9 +2,7 @@ import pytest
 
 from src.fineman.elimination_by_hop_reduction import construct_h, elimination_of_r_remote_edges_by_hop_reduction
 from src.utils import load_test_case, NegativeCycleError
-from src.weight_type import WEIGHT_TYPE
 
-WEIGHT_TYPE = float
 TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
 
 @pytest.mark.parametrize("filename",[
