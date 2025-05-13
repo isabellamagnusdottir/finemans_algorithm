@@ -1,6 +1,6 @@
 from math import ceil, log
 import random as rand
-from src.fineman.helper_functions import h_hop_sssp, h_hop_stsp, super_source_bfd
+from src.fineman.helper_functions import h_hop_sssp, h_hop_stsp, super_source_bfd, transpose_graph
 
 def betweenness_reduction(graph: dict[int, dict[int, float]], neg_edges, tau, beta, c, seed = None):
     if (beta < 1) or (tau < 1) or (tau > len(graph)) or (c <= 1):
@@ -16,9 +16,11 @@ def betweenness_reduction(graph: dict[int, dict[int, float]], neg_edges, tau, be
 
     T = rand.sample(tuple(graph.keys()), sample_size)
 
+    t_graph,t_neg_edges = transpose_graph(graph)
+    
     distances = {}
     for x in T:
-        distances[x] = (h_hop_sssp(x, graph, neg_edges, beta), h_hop_stsp(x, graph, beta))
+        distances[x] = (h_hop_sssp(x, graph, neg_edges, beta), h_hop_sssp(x, t_graph,t_neg_edges, beta))
 
     h_graph, h_neg_edges = _construct_h(graph, T, distances)
     

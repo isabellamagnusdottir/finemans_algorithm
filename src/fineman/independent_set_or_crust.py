@@ -29,4 +29,7 @@ def find_is_or_crust(graph, neg_edges, negative_subset, c, c_prime, seed = None)
         IS_size_threshold = rho/16
         for _ in range(c_prime*ceil(log2(len(graph)))):
             I = rand_is(graph, neg_edges, L, rho)
-            if len(I) >= IS_size_threshold: return I
+            if len(I) >= IS_size_threshold:
+                return I
+        new_seed = (int(time.time()*1000))
+        return find_is_or_crust(graph, neg_edges, negative_subset, c, new_seed)

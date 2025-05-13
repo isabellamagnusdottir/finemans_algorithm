@@ -28,7 +28,7 @@ def fineman(graph, source: int, seed = None, weight_type = float):
             graph, neg_edges, _ = elimination_algorithm(graph, neg_edges)
             assert prev_k >= len(neg_edges)
 
-            if len(neg_edges) == 0: break
+            if len(neg_edges) == 0: return dijkstra(graph, source, org_graph)[:org_n]
 
     distances = dijkstra(graph, source, org_graph)[:org_n]
 
