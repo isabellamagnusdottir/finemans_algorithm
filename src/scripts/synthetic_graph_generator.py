@@ -91,7 +91,10 @@ def single_graph_generator(graph_family: str, no_of_vertices: int, ratio: tuple[
             p = kwargs.get("p")
 
             graph = nx.connected_watts_strogatz_graph(no_of_vertices, k, p, 1000)
-            filename = f"watts-strogatz_{no_of_vertices}_{len(graph.edges)}_{str(ratio[1]).replace(".", "")}_{str(k).replace(".", "")}_{str(p).replace(".", "")}"
+            ratio_str = str(ratio[1]).replace(".", "")
+            k_str = str(k).replace(".", "")
+            p_str = str(p).replace(".", "")
+            filename = f"watts-strogatz_{no_of_vertices}_{len(graph.edges)}_{ratio_str}_{k_str}_{p_str}"
 
         case "grid":
             graph = _generate_single_grid_graph(no_of_vertices)
@@ -104,11 +107,13 @@ def single_graph_generator(graph_family: str, no_of_vertices: int, ratio: tuple[
 
             while (not nx.is_weakly_connected(graph)) or (graph.out_degree(0) == 0):
                 graph = nx.gnm_random_graph(no_of_vertices, scalar * no_of_vertices, directed=True)
-            filename = f"random_{no_of_vertices}_{scalar * no_of_vertices}_{str(ratio[1]).replace(".", "")}"
+            ratio_str = str(ratio[1]).replace(".", "")
+            filename = f"random_{no_of_vertices}_{scalar * no_of_vertices}_{ratio_str}"
 
 
     if not filename:
-        filename = f"{graph_family}_{no_of_vertices}_{len(graph.edges)}_{str(ratio[1]).replace(".", "")}"
+        ratio_str = str(ratio[1]).replace(".", "")
+        filename = f"{graph_family}_{no_of_vertices}_{len(graph.edges)}_{ratio_str}"
 
     _save_graph_json(graph, ratio, filename)
     return filename

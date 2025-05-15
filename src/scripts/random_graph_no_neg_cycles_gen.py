@@ -101,7 +101,8 @@ def generate_random_no_neg_cycles_graph_2(n,scalar,ratio: tuple[float,float]):
         break
 
     json_graph, neg_count = _graph_to_json(graph)
-    filename = f"random-no-neg-cycles-2_{n}_{scalar * n}_{neg_count}_{str(ratio[1]).replace(".","")}"
+    ratio_str = str(ratio[1]).replace(".","")
+    filename = f"random-no-neg-cycles-2_{n}_{scalar * n}_{neg_count}_{ratio_str}"
     _save_to_json(json_graph, filename)
     return filename
 
