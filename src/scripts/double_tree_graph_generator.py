@@ -1,6 +1,7 @@
-# Generate two binary trees with n nodes and matching inbetween them
-def generate_double_tree(depth: int, neg_edge_weight: int):
-    n = 2 ** depth - 1
+# Generate two binary trees of depth d and matching inbetween them
+def generate_double_tree(d: int, neg_edge_weight: int):
+    d = d + 1
+    n = 2 ** d - 1
     graph = {1: {}}
     neg_edges = set()
 
@@ -20,7 +21,7 @@ def generate_double_tree(depth: int, neg_edge_weight: int):
         graph[u][-u] = neg_edge_weight
         neg_edges.add((u,-u))
 
-    graph, neg_edges = _relabel_graph(graph, depth)
+    graph, neg_edges = _relabel_graph(graph, d)
 
     return graph, neg_edges
 

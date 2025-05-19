@@ -69,7 +69,7 @@ def test_construction_of_h_with_multiple_elements_in_T(filename, T, distances):
 def test_betweenness_reduction_reduces_betweenness_on_double_tree_graph(depth):
     c = 3
 
-    graph, neg_edges = generate_double_tree(depth, -(depth*2))
+    graph, neg_edges = generate_double_tree(depth, -(depth*2)-1)
     t_neg_edges= {(v,u) for u,v in neg_edges}
     tau, beta = _compute_constants(neg_edges)
 
