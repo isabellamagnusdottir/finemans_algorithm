@@ -153,28 +153,32 @@ def generate_multiple_watts_strogatz_graphs(no_of_vertices, ratios, ks, ps):
 
 def main(weight_type):
     globals.change_weight_type(weight_type)
-    # PATHS, CYCLES, TREES, COMPLETE GRAPHS
-    families_of_graphs = ["path", "cycle", "random-tree", "complete"]
+    # PATHS, CYCLES, TREES
+    families_of_graphs = ["path", "cycle", "random-tree"]
     no_of_vertices = [10, 50, 100, 200, 500, 750, 1000]
-    ratios = [(1.0, 0.0), (0.9, 0.1), (0.8, 0.2), (0.66, 0.34), (0.5, 0.5), (0.2, 0.8), (0.0, 1.0)]
+    ratios = [(1.0, 0.0), (0.9, 0.1), (0.8, 0.2), (0.6, 0.4), (0.5, 0.5), (0.2, 0.8), (0.0, 1.0)]
 
     for family in families_of_graphs:
         generate_multiple_graphs(family, no_of_vertices, ratios)
 
+    # COMPLETE GRAPHS
+    ratios = [(1.0, 0.0), (0.9, 0.1), (0.8, 0.2), (0.66, 0.34), (0.5, 0.5), (0.4, 0.6)]
+    generate_multiple_graphs("complete", no_of_vertices, ratios)
+
     # RANDOM GRAPHS
     edges_scalar = [3, 5, 6, 9]
-    ratios = [(1.0,0.0), (0.98, 0.02), (0.95, 0.05), (0.92, 0.08), (0.9,0.1), (0.8, 0.2), (0.5, 0.5), (0.2, 0.8), (0.0, 1.0)]
+    ratios = [(1.0,0.0), (0.95, 0.05), (0.9,0.1), (0.8, 0.2), (0.5, 0.5), (0.2, 0.8), (0.0, 1.0)]
     generate_multiple_random_graphs(no_of_vertices, ratios, edges_scalar)
 
     # GRIDS
     no_of_vertices = [6, 10, 30]
-    ratios = [(1.0, 0.0), (0.95, 0.05), (0.9, 0.1), (0.8, 0.2), (0.66, 0.34), (0.5, 0.5), (0.2, 0.8), (0.0, 1.0)]
+    ratios = [(1.0, 0.0), (0.95, 0.05), (0.9, 0.1), (0.8, 0.2), (0.6, 0.4), (0.5, 0.5), (0.2, 0.8)]
     generate_multiple_grids(no_of_vertices, ratios)
 
     # WATTS-STOGATZ GRAPHS
     no_of_vertices = [10, 50, 100, 500, 1000]
-    ratios = [(0.9, 0.1), (0.8, 0.2), (0.66, 0.34), (0.5, 0.5)]
-    neighbors = [2, 3, 4, 5]
+    ratios = [(0.9, 0.1), (0.8, 0.2), (0.6, 0.4), (0.5, 0.5)]
+    neighbors = [2, 4, 5, 9]
     probabilities = [0.05, 0.1, 0.25, 0.4]
     generate_multiple_watts_strogatz_graphs(no_of_vertices, ratios, neighbors, probabilities)
 

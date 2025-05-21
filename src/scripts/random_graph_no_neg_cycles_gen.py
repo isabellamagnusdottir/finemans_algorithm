@@ -119,7 +119,7 @@ def main(w_type):
     globals.change_weight_type(w_type)
     sizes = [10, 50, 100, 200, 500, 750, 1000]
     scalars = [3, 5, 6, 9]
-    ratios = [(0.9, 0.1), (0.8, 0.2), (0.66, 0.34), (0.5, 0.5), (0.2, 0.8), (0.0, 1.0)]
+    ratios = [(0.9, 0.1), (0.8, 0.2), (0.6, 0.4), (0.5, 0.5), (0.2, 0.8), (0.0, 1.0)]
     for num in sizes:
         for scalar in scalars:
             generate_random_no_neg_cycles_graph_1(num, scalar)
