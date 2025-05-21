@@ -9,7 +9,10 @@ TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
 ])
 def test_crust_for_small_dag_with_sandwich_like_structure(subset,expected):
     graph,neg_edges = load_test_case(TESTDATA_FILEPATH+"9_vertex_dag_sandwich.json")
-    actual = find_is_or_crust(graph,neg_edges,subset,3,4,0)
+    t_neg_edges = {(v, u) for u, v in neg_edges}
+
+    actual = find_is_or_crust(graph, neg_edges, t_neg_edges, subset, 3, 4, 0)
+
     assert actual[0] == expected[0]
     assert actual[1] == expected[1]
 
@@ -23,7 +26,10 @@ def test_crust_for_small_dag_with_sandwich_like_structure(subset,expected):
 ])
 def test_crust_for_small_dag_picking_isolated_vertex(subset,expected,repeat):
     graph,neg_edges = load_test_case(TESTDATA_FILEPATH+"9_vertex_dag_sandwich.json")
-    actual = find_is_or_crust(graph,neg_edges,subset,4,4,102)
+    t_neg_edges = {(v, u) for u, v in neg_edges}
+
+    actual = find_is_or_crust(graph, neg_edges, t_neg_edges, subset, 4, 4, 102)
+
     assert actual[0] == expected[0]
     assert actual[1] == expected[1]
 
@@ -35,5 +41,8 @@ def test_crust_for_small_dag_picking_isolated_vertex(subset,expected,repeat):
 ])
 def test_random_independent_set_for_large_weight_cycle(subset,expected,repeat):
     graph,neg_edges = load_test_case(TESTDATA_FILEPATH+"6_cycle_large_positive_weights.json")
-    actual = find_is_or_crust(graph,neg_edges,subset,2,4)
+    t_neg_edges = {(v, u) for u, v in neg_edges}
+
+    actual = find_is_or_crust(graph, neg_edges, t_neg_edges, subset, 2, 4)
+
     assert actual == expected

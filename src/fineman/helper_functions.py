@@ -82,8 +82,8 @@ def h_hop_sssp(source, graph, neg_edges: set, h: int, I_prime=None, parent=None,
         dist = dijkstra(graph, neg_edges, dist, pq, I_prime, parent, anc_in_I, save_source)
     return [dist[v][0] for v in range(len(graph))]
 
-def h_hop_stsp(target, graph, h: int):
-    t_graph, t_neg_edges = transpose_graph(graph)
+def h_hop_stsp(target, graph, t_neg_edges, h: int):
+    t_graph, _ = transpose_graph(graph)
     return h_hop_sssp(target, t_graph, t_neg_edges, h)
 
 def transpose_graph(graph):
@@ -157,39 +157,35 @@ def get_set_of_neg_vertices(graph):
     return neg_vertices
 
 
-def find_betweenness_set(source, target, graph, neg_edges, h: int):
+def find_betweenness_set(source, target, graph, neg_edges, t_neg_edges, h: int):
     dist1 = h_hop_sssp(source, graph, neg_edges, h)
-    dist2 = h_hop_stsp(target, graph, h)
+    dist2 = h_hop_stsp(target, graph, t_neg_edges, h)
     between = set()
     for x in graph.keys():
         if dist1[x]+dist2[x] < 0:
             between.add(x)
     return between
 
-def betweenness(source, target, graph, neg_edges, h: int):
-    return len(find_betweenness_set(source, target, graph, neg_edges, h))
+def betweenness(source, target, graph, neg_edges, t_neg_edges, h: int):
+    return len(find_betweenness_set(source, target, graph, neg_edges, t_neg_edges, h))
 
 
-def reweight_graph_and_composes_price_functions(graph, new_price_function: list[int], with_transpose = False):
+def reweight_graph(graph, new_price_function: list[int], with_transpose = False):
     """
-    Reweights the given graph with the provided new_price_function, and composes the new_price_function with existing
-    precomputed price functions.
+    Reweights the given graph with the provided new_price_functions.
 
     :param graph: the initial graphs, which needs to be reweighted
     :param new_price_function: the price function which reweights the graph
     :param with_transpose: boolean flag deciding whether a transpose graph should be generated as well
 
-    :return: the graph reweighted in new_price_function, a set of the negative edges, a set of the negative vertices,
-    and the composed price function.
+    :return: the graph reweighted in new_price_function, a set of the negative edges, and if with_transpose the
+    reweighted graph transposed.
     """
     new_graph = {}
     new_neg_edges = set()
-    negative_vertices = set()
 
     if with_transpose:
         new_graph_T = {}
-        negative_edges_T = set()
-
 
     for u, edges in graph.items():
 
@@ -211,13 +207,11 @@ def reweight_graph_and_composes_price_functions(graph, new_price_function: list[
 
             if new_graph[u][v] < 0:
                 new_neg_edges.add((u, v))
-                negative_vertices.add(u)
-                if with_transpose: negative_edges_T.add((v,u))
 
     if with_transpose:
-        return new_graph, new_neg_edges, negative_vertices, new_graph_T, negative_edges_T 
+        return new_graph, new_neg_edges, new_graph_T
     else:
-        return new_graph, new_neg_edges, negative_vertices
+        return new_graph, new_neg_edges
 
 
 def reweight_graph_and_get_price_functions(graph, new_price_function, existing):

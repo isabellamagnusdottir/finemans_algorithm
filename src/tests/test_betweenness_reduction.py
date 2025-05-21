@@ -1,6 +1,6 @@
 import pytest
 
-from src.fineman import reweight_graph_and_composes_price_functions
+from src.fineman import reweight_graph
 from src.fineman.betweenness_reduction import _construct_h, betweenness_reduction
 from src.fineman.helper_functions import betweenness
 from src.scripts import generate_double_tree
@@ -8,11 +8,11 @@ from src.utils.load_test_case import load_test_case
 
 TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
 
-def _assert_reduced_betweenness(price_function, graph, neg_edges, beta, threshold):
-    assert any(betweenness(u, v, graph, neg_edges, beta) > threshold for v in graph.keys() for u in graph.keys())
+def _assert_reduced_betweenness(price_function, graph, neg_edges, t_neg_edges, beta, threshold):
+    assert any(betweenness(u, v, graph, neg_edges, t_neg_edges, beta) > threshold for v in graph.keys() for u in graph.keys())
 
-    reweighted_graph, neg_edges, _ = reweight_graph_and_composes_price_functions(graph, price_function)
-    assert all(betweenness(u, v, reweighted_graph, neg_edges, beta) <= threshold for v in reweighted_graph.keys() for u in reweighted_graph.keys())
+    reweighted_graph, neg_edges = reweight_graph(graph, price_function)
+    assert all(betweenness(u, v, reweighted_graph, neg_edges, t_neg_edges, beta) <= threshold for v in reweighted_graph.keys() for u in reweighted_graph.keys())
 
 def _compute_constants(neg_edges):
     k = len(neg_edges)
@@ -70,20 +70,22 @@ def test_betweenness_reduction_reduces_betweenness_on_double_tree_graph(depth):
     c = 3
 
     graph, neg_edges = generate_double_tree(depth, -(depth*2))
+    t_neg_edges= {(v,u) for u,v in neg_edges}
     tau, beta = _compute_constants(neg_edges)
 
     price_function = betweenness_reduction(graph, neg_edges, tau, beta, c)
 
-    _assert_reduced_betweenness(price_function, graph, neg_edges, beta, (len(graph))/tau)
+    _assert_reduced_betweenness(price_function, graph, neg_edges, t_neg_edges, beta, (len(graph))/tau)
 
 @pytest.mark.parametrize("length",[10, 100])
 def test_betweenness_reduction_successful_on_path_with_large_neg_edges(length):
     c = 3
 
     graph, neg_edges = load_test_case(TESTDATA_FILEPATH + f"path_{length}_with_large_neg_edges.json")
+    t_neg_edges = {(v, u) for u, v in neg_edges}
     tau, beta = _compute_constants(neg_edges)
 
     price_function = betweenness_reduction(graph, neg_edges, tau, beta, c)
 
-    _assert_reduced_betweenness(price_function, graph, neg_edges, beta, (len(graph))/tau)
+    _assert_reduced_betweenness(price_function, graph, neg_edges, t_neg_edges, beta, (len(graph))/tau)
 

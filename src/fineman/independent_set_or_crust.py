@@ -6,7 +6,7 @@ from math import ceil, log2
 import random as rand
 
 
-def find_is_or_crust(graph, neg_edges, negative_subset, c, c_prime, seed = None):
+def find_is_or_crust(graph, neg_edges, t_neg_edges, negative_subset, c, c_prime, seed = None):
     if seed is not None: rand.seed(seed)
     k_hat = len(negative_subset)
     rho = k_hat**(1/3)
@@ -17,7 +17,7 @@ def find_is_or_crust(graph, neg_edges, negative_subset, c, c_prime, seed = None)
         y = rand.choice(tuple(H))
         #TODO: Consider if we want to strictly extract the transpose graph here as we will
         # be working with the transpose graph after if we succeed in finding large enough set
-        dist = h_hop_stsp(y, graph, 1)
+        dist = h_hop_stsp(y, graph, t_neg_edges, 1)
         U = {u for u in negative_subset if dist[u] < 0}
         if len(U) < (1/8)*k_hat/rho:
             new_seed = (int(time.time()*1000))
