@@ -6,7 +6,7 @@ from math import ceil, log2
 import random as rand
 
 
-def find_is_or_crust(graph, neg_edges, t_neg_edges, negative_subset, c, c_prime, seed = None):
+def find_is_or_crust(graph, neg_edges, t_neg_edges, negative_subset, c=6, c_prime=4, seed = None):
     if seed is not None: rand.seed(seed)
     k_hat = len(negative_subset)
     rho = k_hat**(1/3)

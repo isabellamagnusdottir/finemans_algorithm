@@ -251,8 +251,7 @@ def super_source_bfd_save_rounds(graph, neg_edges, subset, h: int):
     super_source = len(graph)
     graph[super_source] = {}
     for v in subset:
-        if v != super_source:
-            graph[super_source][v] = 0
+        graph[super_source][v] = 0
 
     if globals.WEIGHT_TYPE is Decimal:
         dist = [[Decimal('Infinity'),Decimal('Infinity')] for _ in range(len(graph))]
