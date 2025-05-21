@@ -1,5 +1,4 @@
 import pytest
-from numpy import inf
 from src.fineman.helper_functions import *
 from src.utils.load_test_case import load_test_case
 
@@ -16,6 +15,7 @@ TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
     "path_with_only_neg_edges.json"
 ])
 def test_transpose_graph_on_multiple_graphs(filename):
+    
     graph, _ = load_test_case(TESTDATA_FILEPATH + filename)
 
     transposed_graph, _ = transpose_graph(graph)
@@ -39,17 +39,14 @@ def test_transpose_graph_on_multiple_graphs(filename):
 def test_reweight_with_transpose_is_transposed(filename):
     graph, neg_edges = load_test_case(TESTDATA_FILEPATH + filename)
 
-    
     empty_price_function = [0]*len(graph)
-    _,_,_,T_graph,T_neg_edges = reweight_graph_and_composes_price_functions(graph,empty_price_function,with_transpose=True)
+    _, _, T_graph = reweight_graph(graph, empty_price_function, with_transpose=True)
 
     assert graph.keys() == T_graph.keys()
     assert all(all(graph[neighbor][vertex]  == weight for neighbor, weight in neighbors.items()) for vertex, neighbors in T_graph.items())
-    assert all( (v,u) in T_neg_edges for (u,v) in neg_edges)
 
     transposed_graph, transposed_neg_edges = transpose_graph(graph)
     assert T_graph == transposed_graph
-    assert T_neg_edges == transposed_neg_edges
 
 
 @pytest.mark.parametrize("filename,expected", [
@@ -84,10 +81,10 @@ def test_dijkstra_implementation(filename, expected):
 
 
 @pytest.mark.parametrize("filename,expected", [
-    ("complete_4_vertices_graph_with_no_neg_edges.json", [ 0, inf, inf, inf]),
-    ("disconnected_graph.json", [ 0, inf, -1, inf, inf, inf]),
-    ("path_with_only_neg_edges.json", [ 0, -1, inf, inf, inf, inf]),
-    ("path_tricky.json", [ 0, inf, inf, inf, inf, inf]),
+    ("complete_4_vertices_graph_with_no_neg_edges.json", [0, inf, inf, inf]),
+    ("disconnected_graph.json", [0, inf, -1, inf, inf, inf]),
+    ("path_with_only_neg_edges.json", [0, -1, inf, inf, inf, inf]),
+    ("path_tricky.json", [0, inf, inf, inf, inf, inf]),
 ])
 def test_bellman_ford_implementation(filename, expected):
     graph, neg_edges = load_test_case(TESTDATA_FILEPATH + filename)
@@ -148,9 +145,11 @@ def test_beta_hop_sssp_implementation(filename, beta, expected):
     ("path_tricky.json", 5, [ -4, -4, -3, -2, -1, 0]),
 ])
 def test_beta_hop_stsp_implementation(filename, beta, expected):
-    graph, _ = load_test_case(TESTDATA_FILEPATH + filename)
+    graph, neg_set = load_test_case(TESTDATA_FILEPATH + filename)
 
-    dist = h_hop_stsp(len(graph.keys()) - 1, graph, beta)
+    t_neg_set = {(v,u) for u,v in neg_set}
+
+    dist = h_hop_stsp(len(graph.keys()) - 1, graph, t_neg_set, beta)
     assert dist == expected
 
 
@@ -212,7 +211,8 @@ def test_super_source_bfd_cycle_detection_on_graphs_with_neg_cycles(filename, be
 ])
 def test_betweenness_set_small_flow_dag(source,target,beta,expected):
     graph,neg_edges = load_test_case(TESTDATA_FILEPATH+"small_flow_dag.json")
-    actual = find_betweenness_set(source,target,graph,neg_edges,beta)
+    t_neg_edges = {(v, u) for u, v in neg_edges}
+    actual = find_betweenness_set(source, target, graph, neg_edges, t_neg_edges, beta)
     assert actual == expected
 
 @pytest.mark.parametrize("beta,expected", [
@@ -223,7 +223,8 @@ def test_betweenness_set_small_flow_dag(source,target,beta,expected):
 ])
 def test_betweenness_set_flow_dag_with_source_1_and_target_25(beta, expected):
     graph, neg_edges = load_test_case(TESTDATA_FILEPATH + "dag_flow.json")
-    actual = find_betweenness_set(0, 24, graph, neg_edges, beta)
+    t_neg_edges = {(v, u) for u, v in neg_edges}
+    actual = find_betweenness_set(0, 24, graph, neg_edges, t_neg_edges, beta)
     assert actual == expected
 
 @pytest.mark.parametrize("beta,expected", [
@@ -234,7 +235,8 @@ def test_betweenness_set_flow_dag_with_source_1_and_target_25(beta, expected):
 ])
 def test_betweenness_set_random_graph_with_neg_edges_with_source_1_and_target_15(beta, expected):
     graph, neg_edges = load_test_case(TESTDATA_FILEPATH + "graph_with_neg_edges.json")
-    actual = find_betweenness_set(0, 13, graph, neg_edges, beta)
+    t_neg_edges = {(v, u) for u, v in neg_edges}
+    actual = find_betweenness_set(0, 13, graph, neg_edges, t_neg_edges, beta)
     assert actual == expected
 
 @pytest.mark.parametrize("source,target,beta,expected", [
@@ -245,7 +247,8 @@ def test_betweenness_set_random_graph_with_neg_edges_with_source_1_and_target_15
 ])
 def test_betweenness_set_negative_cycle4(source, target, beta, expected):
     graph, neg_edges = load_test_case(TESTDATA_FILEPATH + "negative_cycle_4.json")
-    actual = find_betweenness_set(source, target, graph, neg_edges, beta)
+    t_neg_edges = {(v, u) for u, v in neg_edges}
+    actual = find_betweenness_set(source, target, graph, neg_edges, t_neg_edges, beta)
     assert actual == expected
 
 @pytest.mark.parametrize("source,target,beta,expected", [
@@ -257,7 +260,8 @@ def test_betweenness_set_negative_cycle4(source, target, beta, expected):
 ])
 def test_betweenness_set_complete_graph_with_neg_edges(source, target, beta, expected):
     graph, neg_edges = load_test_case(TESTDATA_FILEPATH + "complete_4_vertices_graph_with_neg_edges.json")
-    actual = find_betweenness_set(source, target, graph, neg_edges, beta)
+    t_neg_edges = {(v, u) for u, v in neg_edges}
+    actual = find_betweenness_set(source, target, graph, neg_edges, t_neg_edges, beta)
     assert actual == expected
 
 
@@ -278,7 +282,9 @@ def test_betweenness_set_complete_graph_with_neg_edges(source, target, beta, exp
 ])
 def test_betweeness_set_small_tree_with_negative_edges_from_root_to_leaves(source,target,beta,expected):
     graph,neg_edges = load_test_case(TESTDATA_FILEPATH+"small_tree.json")
-    actual = find_betweenness_set(source,target,graph,neg_edges,beta)
+    t_neg_edges = {(v, u) for u, v in neg_edges}
+
+    actual = find_betweenness_set(source, target, graph, neg_edges, t_neg_edges, beta)
     assert actual == expected
 
 
@@ -295,7 +301,9 @@ def test_betweeness_set_small_tree_with_negative_edges_from_root_to_leaves(sourc
 ])
 def test_betweeness_set_small_path_with_only_negative_edges(source,target,beta,expected):
     graph,neg_edges = load_test_case(TESTDATA_FILEPATH+"path_with_only_neg_edges.json")
-    actual = find_betweenness_set(source,target,graph,neg_edges,beta)
+    t_neg_edges = {(v, u) for u, v in neg_edges}
+
+    actual = find_betweenness_set(source, target, graph, neg_edges, t_neg_edges, beta)
     assert actual == expected
 
 @pytest.mark.parametrize("source,target,beta,expected", [
@@ -304,7 +312,9 @@ def test_betweeness_set_small_path_with_only_negative_edges(source,target,beta,e
 ])
 def test_betweeness_set_small_path_with_only_positive_edges(source,target,beta,expected):
     graph,neg_edges = load_test_case(TESTDATA_FILEPATH+"path_with_only_positive_edges.json")
-    actual = find_betweenness_set(source,target,graph,neg_edges,beta)
+    t_neg_edges = {(v, u) for u, v in neg_edges}
+
+    actual = find_betweenness_set(source, target, graph, neg_edges, t_neg_edges, beta)
     assert actual == expected
 
 
@@ -324,7 +334,9 @@ def test_betweeness_set_small_path_with_only_positive_edges(source,target,beta,e
 ])
 def test_betweenness_set_grid_with_negative_edges(source,target,beta,expected):
     graph,neg_edges = load_test_case(TESTDATA_FILEPATH+"small_grid_with_negative_edges.json")
-    actual = find_betweenness_set(source,target,graph,neg_edges,beta)
+    t_neg_edges = {(v, u) for u, v in neg_edges}
+
+    actual = find_betweenness_set(source, target, graph, neg_edges, t_neg_edges, beta)
     assert actual == expected
 
 @pytest.mark.parametrize("price_function,expected_graph", [
@@ -339,13 +351,11 @@ def test_reweight_path_given_price_function(price_function, expected_graph):
     graph,_ = load_test_case(TESTDATA_FILEPATH + "path_with_only_positive_edges.json")
 
     expected_neg_edges = {(u, v) for u, edges in expected_graph.items() for v, w in edges.items() if w < 0}
-    expected_neg_vertices = {u for u, _ in expected_neg_edges}
 
-    actual_graph, actual_neg_edges, actual_neg_vertices = reweight_graph_and_composes_price_functions(graph, price_function)
+    actual_graph, actual_neg_edges = reweight_graph(graph, price_function)
 
     assert actual_graph == expected_graph
     assert actual_neg_edges == expected_neg_edges
-    assert actual_neg_vertices == expected_neg_vertices
 
 @pytest.mark.parametrize("price_function,expected_graph", [
     ([-3,5,-7,-1],
@@ -356,13 +366,11 @@ def test_reweight_cycle_given_price_function(price_function, expected_graph):
     graph,_ = load_test_case(TESTDATA_FILEPATH + "negative_cycle_4.json")
 
     expected_neg_edges = {(u,v) for u, edges in expected_graph.items() for v, w in edges.items() if w < 0}
-    expected_neg_vertices = {u for u,_ in expected_neg_edges}
 
-    actual_graph, actual_neg_edges, actual_neg_vertices = reweight_graph_and_composes_price_functions(graph, price_function)
+    actual_graph, actual_neg_edges = reweight_graph(graph, price_function)
 
     assert actual_graph == expected_graph
     assert actual_neg_edges == expected_neg_edges
-    assert actual_neg_vertices == expected_neg_vertices
 
 
 @pytest.mark.parametrize("subset,expected", [

@@ -1,15 +1,27 @@
+import argparse
+from decimal import Decimal
 import json
 import random as rand
 import re
 
 import networkx as nx
 from networkx.classes import DiGraph
+import src.globals as globals
+
 
 
 def _get_weight(weights):
-    if rand.choices([True, False], weights)[0]:
-        return round(rand.uniform(0.0, 30.0), 2)
-    return round(rand.uniform(-10.0, -1.0), 2)
+    is_pos = rand.choices([True, False], weights)[0]
+    if globals.WEIGHT_TYPE is Decimal:
+        start, end = (0, 30_000) if is_pos else (-10_000, -1000)
+        rand_int = rand.randint(start, end)
+        return Decimal(rand_int) / Decimal(1000)
+    elif globals.WEIGHT_TYPE is float:
+        start, end = (0.0, 30.0) if is_pos else (-10.0, -0.01)
+        return round(rand.uniform(start, end), 2)
+    else:
+        start, end = (0, 30) if is_pos else (-10, -1)
+        return rand.randint(start, end)
 
 
 def _graph_to_json(graph: DiGraph, weights):
@@ -20,7 +32,7 @@ def _graph_to_json(graph: DiGraph, weights):
             graph_data[str(u)] = []
         if u in graph.nodes:
             for v in graph.neighbors(u):
-                graph_data[str(u)].append([v, _get_weight(weights)])
+                graph_data[str(u)].append([v, str(_get_weight(weights))])
 
     return graph_data
 
@@ -29,7 +41,9 @@ def _save_graph_json(graph: DiGraph, weights, filename: str):
     json_data = _graph_to_json(graph, weights)
     with open("src/tests/test_data/synthetic_graphs/" + filename + ".json", 'w') as f:
         json_str = json.dumps(json_data, indent=2)
-        json_str = re.sub(r'\[\n\s*(\d+),\n\s*(-?\d+(\.\d+)?)\n\s*\]', r'[\1,\2]', json_str)
+        json_str = re.sub(r'\[\s*\n\s*(\d+),\s*\n\s*("?-?\d+(?:\.\d+)?")\s*\n\s*\]',
+                          r'[\1, \2]',
+                          json_str)
         f.write(json_str)
 
 
@@ -137,32 +151,40 @@ def generate_multiple_watts_strogatz_graphs(no_of_vertices, ratios, ks, ps):
                 for p in ps:
                     single_graph_generator("watts-strogatz", num, r, k=k, p=p)
 
-def main():
-    # PATHS, CYCLES, TREES, COMPLETE GRAPHS
-    families_of_graphs = ["path", "cycle", "random-tree", "complete"]
+def main(weight_type):
+    globals.change_weight_type(weight_type)
+    # PATHS, CYCLES, TREES
+    families_of_graphs = ["path", "cycle", "random-tree"]
     no_of_vertices = [10, 50, 100, 200, 500, 750, 1000]
-    ratios = [(1.0, 0.0), (0.9, 0.1), (0.8, 0.2), (0.66, 0.34), (0.5, 0.5), (0.2, 0.8), (0.0, 1.0)]
+    ratios = [(1.0, 0.0), (0.9, 0.1), (0.8, 0.2), (0.6, 0.4), (0.5, 0.5), (0.2, 0.8), (0.0, 1.0)]
 
     for family in families_of_graphs:
         generate_multiple_graphs(family, no_of_vertices, ratios)
 
+    # COMPLETE GRAPHS
+    ratios = [(1.0, 0.0), (0.9, 0.1), (0.8, 0.2), (0.66, 0.34), (0.5, 0.5), (0.4, 0.6)]
+    generate_multiple_graphs("complete", no_of_vertices, ratios)
+
     # RANDOM GRAPHS
     edges_scalar = [3, 5, 6, 9]
-    ratios = [(1.0,0.0), (0.98, 0.02), (0.95, 0.05), (0.92, 0.08), (0.9,0.1), (0.8, 0.2), (0.5, 0.5), (0.2, 0.8), (0.0, 1.0)]
+    ratios = [(1.0,0.0), (0.95, 0.05), (0.9,0.1), (0.8, 0.2), (0.5, 0.5), (0.2, 0.8), (0.0, 1.0)]
     generate_multiple_random_graphs(no_of_vertices, ratios, edges_scalar)
 
     # GRIDS
     no_of_vertices = [6, 10, 30]
-    ratios = [(1.0, 0.0), (0.95, 0.05), (0.9, 0.1), (0.8, 0.2), (0.66, 0.34), (0.5, 0.5), (0.2, 0.8), (0.0, 1.0)]
+    ratios = [(1.0, 0.0), (0.95, 0.05), (0.9, 0.1), (0.8, 0.2), (0.6, 0.4), (0.5, 0.5), (0.2, 0.8)]
     generate_multiple_grids(no_of_vertices, ratios)
 
     # WATTS-STOGATZ GRAPHS
     no_of_vertices = [10, 50, 100, 500, 1000]
-    ratios = [(0.9, 0.1), (0.8, 0.2), (0.66, 0.34), (0.5, 0.5)]
-    neighbors = [2, 3, 4, 5]
+    ratios = [(0.9, 0.1), (0.8, 0.2), (0.6, 0.4), (0.5, 0.5)]
+    neighbors = [2, 4, 5, 9]
     probabilities = [0.05, 0.1, 0.25, 0.4]
     generate_multiple_watts_strogatz_graphs(no_of_vertices, ratios, neighbors, probabilities)
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Data type of edge weights")
+    parser.add_argument("type", type=str, default="int", help="Data type to use: int, float or decimal")
+    args = parser.parse_args()
+    main(globals.types[args.type])
