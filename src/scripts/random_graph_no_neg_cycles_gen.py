@@ -1,14 +1,16 @@
 import argparse
 import json
-import re
+import os
 import random as rand
+import re
+from pathlib import Path
+
 import networkx as nx
 
-from src.fineman import bellman_ford
-from src.scripts.synthetic_graph_generator import _get_weight
-from src.scripts.bellman_ford import standard_bellman_ford
-from src.utils.cycle_error import NegativeCycleError
 import src.globals as globals
+from src.scripts.bellman_ford import standard_bellman_ford
+from src.scripts.synthetic_graph_generator import _get_weight
+from src.utils.cycle_error import NegativeCycleError
 
 
 def _swap_sign_of_neg_edge_in_cycle(graph, cycle):
@@ -110,12 +112,16 @@ def generate_random_no_neg_cycles_graph_2(n,scalar,ratio: tuple[float,float]):
         break
 
     json_graph, neg_count = _graph_to_json(graph)
-    filename = f"random-no-neg-cycles-2_{n}_{scalar * n}_{neg_count}_{str(ratio[1]).replace(".","")}"
+    ratio_str = str(ratio[1]).replace(".","")
+    filename = f"random-no-neg-cycles-2_{n}_{scalar * n}_{neg_count}_{ratio_str}"
     _save_to_json(json_graph, filename)
     return filename
 
 
 def main(w_type):
+    if not os.path.isdir(Path.cwd() / "src" / "tests" / "test_data" / "synthetic_graphs"):
+        os.makedirs(Path.cwd() / "src" / "tests" / "test_data" / "synthetic_graphs")
+
     globals.change_weight_type(w_type)
     sizes = [10, 50, 100, 200, 500, 750, 1000]
     scalars = [3, 5, 6, 9]
