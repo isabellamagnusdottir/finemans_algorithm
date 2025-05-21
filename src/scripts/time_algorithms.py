@@ -71,6 +71,7 @@ def time_algorithms():
         graph_info = Path(file_name).stem.split('_')
         
         graph_file = get_graph_file_name(name, graph_info)
+        print(graph_file)
 
         bellmanford_times = []
         fineman_times = []

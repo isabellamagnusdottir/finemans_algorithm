@@ -185,7 +185,7 @@ def main(weight_type):
 
     # GRIDS
     no_of_vertices = [6, 10, 30]
-    ratios = [(1.0, 0.0), (0.95, 0.05), (0.9, 0.1), (0.8, 0.2), (0.6, 0.4), (0.5, 0.5), (0.2, 0.8)]
+    ratios = [(1.0, 0.0), (0.95, 0.05), (0.9, 0.1), (0.8, 0.2), (0.6, 0.4), (0.5, 0.5), (0.4, 0.6)]
     generate_multiple_grids(no_of_vertices, ratios)
 
     # WATTS-STOGATZ GRAPHS
