@@ -1,19 +1,17 @@
-from queue import PriorityQueue
 from numpy import inf
+import heapq
 
 def dijkstra(graph, source, org_graph):
     dist = [inf] * (len(graph.keys()))
     dist[source] = 0
-    pq = PriorityQueue()
+    pq = []
+    heapq.heappush(pq, (dist[source], source))
 
     org_dist = [inf] * (len(graph.keys()))
     org_dist[source] = 0
 
-    for v in graph.keys():
-        pq.put((dist[v], v))
-
-    while not pq.empty():
-        current_dist, u = pq.get()
+    while pq:
+        current_dist, u = heapq.heappop(pq)
         if current_dist > dist[u]:
             continue
 
@@ -22,6 +20,6 @@ def dijkstra(graph, source, org_graph):
             if alt_dist < dist[v]:
                 org_dist[v] = org_dist[u] + org_graph[u][v]
                 dist[v] = alt_dist
-                pq.put((alt_dist, v))
+                heapq.heappush(pq, (alt_dist, v))
 
     return org_dist
