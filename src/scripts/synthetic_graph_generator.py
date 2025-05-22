@@ -3,6 +3,8 @@ from decimal import Decimal
 import json
 import random as rand
 import re
+import os
+from pathlib import Path
 
 import networkx as nx
 from networkx.classes import DiGraph
@@ -105,7 +107,10 @@ def single_graph_generator(graph_family: str, no_of_vertices: int, ratio: tuple[
             p = kwargs.get("p")
 
             graph = nx.connected_watts_strogatz_graph(no_of_vertices, k, p, 1000)
-            filename = f"watts-strogatz_{no_of_vertices}_{len(graph.edges)}_{str(ratio[1]).replace(".", "")}_{str(k).replace(".", "")}_{str(p).replace(".", "")}"
+            ratio_str = str(ratio[1]).replace(".", "")
+            k_str = str(k).replace(".", "")
+            p_str = str(p).replace(".", "")
+            filename = f"watts-strogatz_{no_of_vertices}_{len(graph.edges)}_{ratio_str}_{k_str}_{p_str}"
 
         case "grid":
             graph = _generate_single_grid_graph(no_of_vertices)
@@ -118,11 +123,14 @@ def single_graph_generator(graph_family: str, no_of_vertices: int, ratio: tuple[
 
             while (not nx.is_weakly_connected(graph)) or (graph.out_degree(0) == 0):
                 graph = nx.gnm_random_graph(no_of_vertices, scalar * no_of_vertices, directed=True)
-            filename = f"random_{no_of_vertices}_{scalar * no_of_vertices}_{str(ratio[1]).replace(".", "")}"
+            
+            ratio_str = str(ratio[1]).replace(".", "")
+            filename = f"random_{no_of_vertices}_{scalar * no_of_vertices}_{ratio_str}"
 
 
     if not filename:
-        filename = f"{graph_family}_{no_of_vertices}_{len(graph.edges)}_{str(ratio[1]).replace(".", "")}"
+        ratio_str = str(ratio[1]).replace(".", "")
+        filename = f"{graph_family}_{no_of_vertices}_{len(graph.edges)}_{ratio_str}"
 
     _save_graph_json(graph, ratio, filename)
     return filename
@@ -152,18 +160,23 @@ def generate_multiple_watts_strogatz_graphs(no_of_vertices, ratios, ks, ps):
                     single_graph_generator("watts-strogatz", num, r, k=k, p=p)
 
 def main(weight_type):
+    if not os.path.isdir(Path.cwd() / "src" / "tests" / "test_data" / "synthetic_graphs"):
+        os.makedirs(Path.cwd() / "src" / "tests" / "test_data" / "synthetic_graphs")
+
     globals.change_weight_type(weight_type)
-    # PATHS, CYCLES, TREES
-    families_of_graphs = ["path", "cycle", "random-tree"]
+
+    # PATHS, TREES
+    families_of_graphs = ["path", "random-tree"]
     no_of_vertices = [10, 50, 100, 200, 500, 750, 1000]
     ratios = [(1.0, 0.0), (0.9, 0.1), (0.8, 0.2), (0.6, 0.4), (0.5, 0.5), (0.2, 0.8), (0.0, 1.0)]
-
     for family in families_of_graphs:
         generate_multiple_graphs(family, no_of_vertices, ratios)
 
-    # COMPLETE GRAPHS
-    ratios = [(1.0, 0.0), (0.9, 0.1), (0.8, 0.2), (0.66, 0.34), (0.5, 0.5), (0.4, 0.6)]
-    generate_multiple_graphs("complete", no_of_vertices, ratios)
+    # CYCLES, COMPLETE GRAPHS
+    families_of_graphs = ["cycle", "complete"]
+    ratios = [(1.0, 0.0), (0.9, 0.1), (0.8, 0.2), (0.6, 0.4), (0.5, 0.5), (0.4, 0.6)]
+    for family in families_of_graphs:
+        generate_multiple_graphs(family, no_of_vertices, ratios)
 
     # RANDOM GRAPHS
     edges_scalar = [3, 5, 6, 9]
@@ -172,13 +185,13 @@ def main(weight_type):
 
     # GRIDS
     no_of_vertices = [6, 10, 30]
-    ratios = [(1.0, 0.0), (0.95, 0.05), (0.9, 0.1), (0.8, 0.2), (0.6, 0.4), (0.5, 0.5), (0.2, 0.8)]
+    ratios = [(1.0, 0.0), (0.95, 0.05), (0.9, 0.1), (0.8, 0.2), (0.6, 0.4), (0.5, 0.5), (0.4, 0.6)]
     generate_multiple_grids(no_of_vertices, ratios)
 
     # WATTS-STOGATZ GRAPHS
-    no_of_vertices = [10, 50, 100, 500, 1000]
+    no_of_vertices = [10, 100, 500, 1000]
     ratios = [(0.9, 0.1), (0.8, 0.2), (0.6, 0.4), (0.5, 0.5)]
-    neighbors = [2, 4, 5, 9]
+    neighbors = [4, 5, 9]
     probabilities = [0.05, 0.1, 0.25, 0.4]
     generate_multiple_watts_strogatz_graphs(no_of_vertices, ratios, neighbors, probabilities)
 

@@ -46,7 +46,6 @@ def _subgraph_of_pos_edges_and_out_set(graph: dict[int, dict[int, float]], org_n
 def elimination_algorithm(org_graph, org_neg_edges, seed = None):
     n = len(org_graph.keys())
 
-    c = 3
     k = len(org_neg_edges)
     r = ceil(k**(1/9))
 
@@ -56,13 +55,13 @@ def elimination_algorithm(org_graph, org_neg_edges, seed = None):
         neg_vertices.add(u)
         neg_edges_T.add((v,u))
     
-    phi_1 = betweenness_reduction(org_graph, org_neg_edges, tau=r, beta=r+1, c=c)
+    phi_1 = betweenness_reduction(org_graph, org_neg_edges, tau=r, beta=r+1)
     graph_phi1, _, graph_T = reweight_graph(org_graph, phi_1, with_transpose=True)
 
-    match find_is_or_crust(graph_phi1, org_neg_edges, neg_edges_T, neg_vertices, c, c+1):
+    match find_is_or_crust(graph_phi1, org_neg_edges, neg_edges_T, neg_vertices):
         case (y,U_1):
 
-            match find_is_or_crust(graph_T, neg_edges_T, org_neg_edges, U_1, c, c+1):
+            match find_is_or_crust(graph_T, neg_edges_T, org_neg_edges, U_1):
                 case (x,U_2):
                     while len(U_2) > k**(1/3):
                         U_2.pop()

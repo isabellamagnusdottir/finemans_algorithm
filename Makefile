@@ -21,7 +21,7 @@ generate-graphs:
 	poetry run python -m src.scripts.synthetic_graph_generator $(TYPE)
 
 generate-random-graphs:
-	poetry run python -m src.scripts.random_graph_no_neg_cycles_gen
+	poetry run python -m src.scripts.random_graph_no_neg_cycles_gen $(TYPE)
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} +
