@@ -8,8 +8,6 @@ def heavy_light_partition(graph, neg_edges, negative_subset, rho, c: int, seed=N
 
     n = len(graph)
     k_hat = len(negative_subset)
-    if rho > k_hat or rho < 1:
-        raise ValueError("Error -- invalid value for rho")
 
     count = [0] * n
 
