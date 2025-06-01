@@ -1,15 +1,13 @@
 from typing import Tuple,Set
 import random as rand
 from math import ceil, log
-from src.fineman.helper_functions import compute_reach
+from src.fineman.core_functions import compute_reach
 
 def heavy_light_partition(graph, neg_edges, negative_subset, rho, c: int, seed=None) -> Tuple[Set[int], Set[int]]:
     if seed is not None: rand.seed(seed)
 
     n = len(graph)
     k_hat = len(negative_subset)
-    if rho > k_hat or rho < 1:
-        raise ValueError("Error -- invalid value for rho")
 
     count = [0] * n
 

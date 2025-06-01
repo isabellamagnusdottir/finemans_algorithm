@@ -1,6 +1,6 @@
 from math import ceil
 from collections import deque
-from src.fineman.helper_functions import get_set_of_neg_vertices, transpose_graph
+from src.fineman.core_functions import get_set_of_neg_vertices, transpose_graph
 from src.utils.threshold_error import InvalidThresholdError
 import src.globals as globals
 

@@ -1,4 +1,4 @@
-from src.fineman.helper_functions import *
+from src.fineman.core_functions import *
 from src.fineman.rand_is import *
 from src.fineman.heavy_light_partition import *
 import time
@@ -10,7 +10,6 @@ def find_is_or_crust(graph, neg_edges, t_neg_edges, negative_subset, c=6, c_prim
     if seed is not None: rand.seed(seed)
     k_hat = len(negative_subset)
     rho = k_hat**(1/3)
-    if rho < 1 or rho > k_hat: raise ValueError("rho must be between 1 and k_hat!")
 
     (H,L) = heavy_light_partition(graph, neg_edges, negative_subset, rho, c)
     if H:

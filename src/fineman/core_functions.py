@@ -58,13 +58,17 @@ def bellman_ford(graph, neg_edges: set, dist: list, I_prime = None, anc_in_I = N
 def bfd_save_rounds(super_source, graph, neg_edges, dist: list, beta: int):
     pq = []
     heapq.heappush(pq,(dist[super_source][0],super_source))
-    dist = dijkstra(graph, neg_edges, dist,pq)
-    rounds = [[dist[v][0] for v in graph.keys()]]
-    for _ in range(beta):
-        dist = bellman_ford(graph,neg_edges,dist)
+    rounds = [[]] * (beta+1)
+
+    dist = dijkstra(graph, neg_edges, dist, pq)
+    rounds[0] = [dist[v][0] for v in graph.keys()]
+
+    for i in range(beta):
+        dist = bellman_ford(graph, neg_edges, dist)
         dist = dijkstra(graph, neg_edges, dist, pq)
-        rounds.append([dist[v][0] for v in range(len(graph))])
+        rounds[i+1] = [dist[v][0] for v in range(len(graph))]
     return rounds
+
 
 def h_hop_sssp(source, graph, neg_edges: set, h: int, I_prime=None, parent=None, anc_in_I=None, save_source=False):
     if globals.WEIGHT_TYPE is Decimal:

@@ -1,9 +1,9 @@
 from math import ceil
 
 from src.fineman.betweenness_reduction import betweenness_reduction
-from src.fineman.elimination_by_hop_reduction import elimination_of_r_remote_edges_by_hop_reduction
-from src.fineman.helper_functions import super_source_bfd, compute_reach, transpose_graph, h_hop_sssp, \
+from src.fineman.core_functions import super_source_bfd, compute_reach, h_hop_sssp, \
     h_hop_stsp, reweight_graph
+from src.fineman.elimination_by_hop_reduction import elimination_of_r_remote_edges_by_hop_reduction
 from src.fineman.independent_set_or_crust import find_is_or_crust
 
 
@@ -59,8 +59,8 @@ def elimination_algorithm(org_graph, org_neg_edges, seed = None):
     graph_phi1, _, graph_T = reweight_graph(org_graph, phi_1, with_transpose=True)
 
     match find_is_or_crust(graph_phi1, org_neg_edges, neg_edges_T, neg_vertices):
-        case (y,U_1):
 
+        case (y,U_1):
             match find_is_or_crust(graph_T, neg_edges_T, org_neg_edges, U_1):
                 case (x,U_2):
                     while len(U_2) > k**(1/3):
@@ -81,7 +81,6 @@ def elimination_algorithm(org_graph, org_neg_edges, seed = None):
                 case I:
                     phi = _compute_price_function_to_eliminate_independent_set(graph_phi1, org_neg_edges, I)
                     return reweight_graph(graph_phi1, phi)
-
 
         case I:
             phi = _compute_price_function_to_eliminate_independent_set(graph_phi1, org_neg_edges, I)
