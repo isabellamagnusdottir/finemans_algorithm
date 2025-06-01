@@ -1,9 +1,9 @@
 from math import ceil
 
 from src.fineman.betweenness_reduction import betweenness_reduction
-from src.fineman.elimination_by_hop_reduction import elimination_of_r_remote_edges_by_hop_reduction
-from src.fineman.helper_functions import super_source_bfd, compute_reach, transpose_graph, h_hop_sssp, \
+from src.fineman.core_functions import super_source_bfd, compute_reach, h_hop_sssp, \
     h_hop_stsp, reweight_graph
+from src.fineman.elimination_by_hop_reduction import elimination_of_r_remote_edges_by_hop_reduction
 from src.fineman.independent_set_or_crust import find_is_or_crust
 
 

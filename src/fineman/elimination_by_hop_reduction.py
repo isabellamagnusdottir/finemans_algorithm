@@ -1,6 +1,6 @@
 from math import ceil
 
-from src.fineman.helper_functions import super_source_bfd_save_rounds, super_source_bfd
+from src.fineman.core_functions import super_source_bfd_save_rounds, super_source_bfd
 
 
 def elimination_of_r_remote_edges_by_hop_reduction(graph: dict[int, dict[int, float]], neg_edge_subset: set, r):

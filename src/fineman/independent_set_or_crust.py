@@ -1,4 +1,4 @@
-from src.fineman.helper_functions import *
+from src.fineman.core_functions import *
 from src.fineman.rand_is import *
 from src.fineman.heavy_light_partition import *
 import time

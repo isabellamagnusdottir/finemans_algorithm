@@ -1,6 +1,6 @@
 from .elimination_algorithm import *
 from .betweenness_reduction import *
-from .helper_functions import *
+from .core_functions import *
 from .elimination_by_hop_reduction import *
 from .preprocessing import *
 from .rand_is import *

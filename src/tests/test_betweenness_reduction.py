@@ -2,7 +2,7 @@ import pytest
 
 from src.fineman import reweight_graph
 from src.fineman.betweenness_reduction import _construct_h, betweenness_reduction
-from src.fineman.helper_functions import betweenness
+from src.fineman.core_functions import betweenness
 from src.scripts import generate_double_tree
 from src.utils.load_test_case import load_test_case
 
