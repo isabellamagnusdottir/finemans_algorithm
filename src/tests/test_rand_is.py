@@ -4,7 +4,7 @@ from src.utils.load_test_case import load_test_case
 
 TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
 
-@pytest.mark.parametrize("repeat", range(10))  # Repeat 10 times
+@pytest.mark.parametrize("repeat", range(10))
 @pytest.mark.parametrize("subset,expected",[
     ({0},({0}))
 ])

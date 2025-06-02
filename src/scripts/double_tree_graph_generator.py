@@ -1,4 +1,3 @@
-# Generate two binary trees of depth d and matching inbetween them
 def generate_double_tree(d: int, neg_edge_weight: int):
     d = d + 1
     n = 2 ** d - 1
@@ -30,7 +29,6 @@ def _relabel_graph(graph, depth):
     relabelled_graph = {}
     relabelled_neg_edges = set()
 
-    # compute mapping
     mapping = {i: i-1 for i in range(1, len(graph.keys())//2+1)}
 
     for height in range(depth, 0, -1):
@@ -39,7 +37,6 @@ def _relabel_graph(graph, depth):
         for i in range(int((n+1)/2), n+1):
             mapping[-i] = len(mapping)
 
-    # apply mapping
     for old_node, edges in graph.items():
         new_node = mapping[old_node]
         relabelled_graph[new_node] = {}

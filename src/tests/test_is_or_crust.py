@@ -17,10 +17,7 @@ def test_crust_for_small_dag_with_sandwich_like_structure(subset,expected):
     assert actual[1] == expected[1]
 
 
-
-#TODO: Very low probability of failing -> But no guarantees. Should consider some leniance
-# regarding probability of failure -> Maybe pytest can accept failure #% of the time.
-@pytest.mark.parametrize("repeat", range(10))  # Repeat 10 times
+@pytest.mark.parametrize("repeat", range(10))
 @pytest.mark.parametrize("subset,expected",[
     ({0,2,3,4,8},(8,{2,3,4}))
 ])
@@ -35,7 +32,7 @@ def test_crust_for_small_dag_picking_isolated_vertex(subset,expected,repeat):
 
 
 
-@pytest.mark.parametrize("repeat", range(10))  # Repeat 10 times
+@pytest.mark.parametrize("repeat", range(10)) 
 @pytest.mark.parametrize("subset,expected",[
     ({0},({0}))
 ])

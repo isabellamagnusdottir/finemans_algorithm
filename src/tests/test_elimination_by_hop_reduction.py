@@ -1,6 +1,6 @@
 import pytest
 
-from src.fineman.elimination_by_hop_reduction import construct_h, elimination_of_r_remote_edges_by_hop_reduction
+from src.fineman.elimination_by_hop_reduction import construct_h, _elimination_by_hop_reduction
 from src.utils import load_test_case, NegativeCycleError
 
 TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
@@ -88,11 +88,11 @@ def test_construction_of_h_on_random_graph(dists, R_set, r, expected_h):
     ("negative_cycle_4.json", 1),
     ("graph_with_neg_cycle.json", 2)
 ])
-def test_elimination_by_hop_reduction_detects_negative_cycle(filename, r):
+def test__elimination_by_hop_reduction_detects_negative_cycle(filename, r):
     graph, neg_edges = load_test_case(TESTDATA_FILEPATH + filename)
 
     with pytest.raises(NegativeCycleError):
-        elimination_of_r_remote_edges_by_hop_reduction(graph, neg_edges, r)
+        _elimination_by_hop_reduction(graph, neg_edges, r)
 
 
 @pytest.mark.parametrize("filename,r", [
@@ -101,6 +101,6 @@ def test_elimination_by_hop_reduction_detects_negative_cycle(filename, r):
 def test_elimination_returns_same_length_price_function_as_graphs(filename, r):
     graph, neg_edges = load_test_case(TESTDATA_FILEPATH + filename)
 
-    distances = elimination_of_r_remote_edges_by_hop_reduction(graph, neg_edges, r)
+    distances = _elimination_by_hop_reduction(graph, neg_edges, r)
 
     assert len(distances) == len(graph.keys())

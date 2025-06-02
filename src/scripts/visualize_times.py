@@ -17,21 +17,28 @@ def visualize_timings(csvfile_path: Path):
         reader = csv.DictReader(csvfile)
         
         for row in reader:
-            
             if row['graph_family'] not in family_times:
                 family_times[row['graph_family']] = {}
             
             n = int(row['vertices'])
             m = int(row['edges'])
-            
+
             if row['graph_family'] == "random-no-neg-cycles-1":
                 scalar = int(m/n)
-                
                 if scalar not in family_times[row['graph_family']]:
                     family_times[row['graph_family']][scalar] = []
                 
                 family_times[row['graph_family']][scalar].append((n, float(row['fineman_time']), float(row['bellman_ford_time'])))
-            
+            elif row['graph_family'] == "random-no-neg-cycles-2":
+                scalar = int(m/n)
+                if (scalar,float(row['neg_edge_ratio'])) not in family_times[row['graph_family']]:
+                    family_times[row['graph_family']][(scalar,float(row['neg_edge_ratio']))] = []
+                family_times[row['graph_family']][(scalar,float(row['neg_edge_ratio']))].append((n, float(row['fineman_time']), float(row['bellman_ford_time'])))
+            elif row['graph_family'] == "watts-strogatz":
+                print(row['neg_edge_ratio'])
+                if (int(row['neighbors']),float(row['neg_edge_ratio']),float(row['probability'])) not in family_times[row['graph_family']]:
+                    family_times[row['graph_family']][(int(row['neighbors']),float(row['neg_edge_ratio']),float(row['probability']))] = []
+                family_times[row['graph_family']][(int(row['neighbors']),float(row['neg_edge_ratio']),float(row['probability']))].append((n, float(row['fineman_time']), float(row['bellman_ford_time'])))
             else:
                 ratio = row['neg_edge_ratio']
                 if ratio not in family_times[row['graph_family']]:
@@ -41,35 +48,33 @@ def visualize_timings(csvfile_path: Path):
 
     
     for graph_type, vmap in family_times.items():
-        for key,values in vmap.items():
+        for ke,values in vmap.items():
             values.sort(key=lambda x: x[0])
             x_values = np.array([int(v[0]) for v in values])
-
+            
             plt.figure(figsize=(10, 6))
             plt.xscale("log")
             plt.loglog(x_values, [float(v[1]) for v in values], 'mo-', linewidth=2, markersize=8, label='Fineman Running time')
             plt.loglog(x_values, [float(v[2]) for v in values], 'bo-', linewidth=2, markersize=8, label='Bellman-Ford Running time')
 
-            # Add labels and title
             if graph_type == 'grid':
-                plt.xlabel('Size of grid (n x n)', fontsize=14)
+                plt.xlabel('Size of grid (n x n)', fontsize=16)
             else:
-                plt.xlabel('Number of vertices (n)', fontsize=14)
-                
-            if graph_type == "random-no-neg-cycles-1":
-                plt.title(f'Fineman running time - Type: {graph_type}\n with edge scalar {key}]', fontsize=14)
-            elif graph_type == "random-no-neg-cycles-2":
-                plt.title(f'Fineman running time - Type: {graph_type}\n with initial positive/negative edge distribution [{round(1-float(key), 2)},{round(float(key),2)}]]', fontsize=14)
-            else:
-                plt.title(f'Fineman running time - Type: {graph_type}\n positive/negative edge distribution: [{round(1-float(key), 2)},{round(float(key),2)}]', fontsize=14)
+                plt.xlabel('Number of vertices (n)', fontsize=16)
 
-            plt.ylabel('Time (seconds)', fontsize=14)
+            plt.xticks(fontsize=14)
+            plt.yticks(fontsize=14)
+            plt.ylabel('Time (seconds)', fontsize=16)
             plt.grid(True, which="both", ls="--", alpha=0.8)
-            plt.legend(fontsize=12)
+            plt.legend(fontsize=14)
 
             plt.tight_layout()
-            
-            plt.savefig(Path("plots/"+f"fineman_bford_comparison_{graph_type}_{1-float(key)}-{key}.png"))
+            if graph_type == "random-no-neg-cycles-2":
+                plt.savefig(Path("plots/"+f"fineman_bford_comparison_{graph_type}_{ke[0]}_{1-float(ke[1])}-{ke[1]}.png"))
+            elif graph_type == "watts-strogatz":
+                plt.savefig(Path("plots/"+f"fineman_bford_comparison_{graph_type}_neighbors_{ke[0]}_ratios_{1-float(ke[1])}-{ke[1]}_probabilities_{ke[2]}.png"))
+            else:
+                plt.savefig(Path("plots/"+f"fineman_bford_comparison_{graph_type}_{1-float(ke)}-{ke}.png"))
 
 def main():
     parser = argparse.ArgumentParser()

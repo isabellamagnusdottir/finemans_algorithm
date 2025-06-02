@@ -25,6 +25,5 @@ def heavy_light_partition(graph, neg_edges, negative_subset, rho, c: int, seed=N
 
     heavy_threshold = (c/2)*ceil(log(n))
     H = {u for u in negative_subset if count[u] >= heavy_threshold}
-    L = negative_subset - H #O(len(negative_subset))
-
+    L = negative_subset - H
     return (H,L)

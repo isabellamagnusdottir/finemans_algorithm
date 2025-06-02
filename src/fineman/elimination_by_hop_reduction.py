@@ -3,7 +3,7 @@ from math import ceil
 from src.fineman.core_functions import super_source_bfd_save_rounds, super_source_bfd
 
 
-def elimination_of_r_remote_edges_by_hop_reduction(graph: dict[int, dict[int, float]], neg_edge_subset: set, r):
+def _elimination_by_hop_reduction(graph: dict[int, dict[int, float]], neg_edge_subset: set, r):
 
     k_hat = len(neg_edge_subset)
     dists = super_source_bfd_save_rounds(graph, neg_edge_subset, graph.keys(), r)
