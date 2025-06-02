@@ -14,6 +14,15 @@ This project was created to:
 - perform performance tests on the implementation and compare with the Bellman-Ford algorithm,
 - provide a foundation for future experimental research by providing a set of tools.
 
+## Important information
+
+Our test suite relies on our synthetic graphs, as such make sure to have poetry
+installed before running the following commands:
+
+1. `make install`
+2. `make generate-graphs`
+3. `make test`
+
 ## Usage
 To use Fineman's algorithm, import the `fineman` module from the `fineman` package,
 provide the method with a graph represented as a nested dictionary mapping as such:
