@@ -1,6 +1,6 @@
 import pytest
 
-from src.fineman._elimination_by_hop_reduction import construct_h, _elimination_by_hop_reduction
+from src.fineman.elimination_by_hop_reduction import construct_h, _elimination_by_hop_reduction
 from src.utils import load_test_case, NegativeCycleError
 
 TESTDATA_FILEPATH = "src/tests/test_data/graphs/"

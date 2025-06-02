@@ -3,7 +3,7 @@ from math import ceil
 from src.fineman.betweenness_reduction import betweenness_reduction
 from src.fineman.core_functions import super_source_bfd, compute_reach, h_hop_sssp, \
     h_hop_stsp, reweight_graph
-from src.fineman._elimination_by_hop_reduction import _elimination_by_hop_reduction
+from src.fineman.elimination_by_hop_reduction import _elimination_by_hop_reduction
 from src.fineman.independent_set_or_crust import find_is_or_crust
 
 

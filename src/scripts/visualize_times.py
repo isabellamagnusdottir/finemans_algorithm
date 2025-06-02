@@ -34,6 +34,11 @@ def visualize_timings(csvfile_path: Path):
                 if (scalar,float(row['neg_edge_ratio'])) not in family_times[row['graph_family']]:
                     family_times[row['graph_family']][(scalar,float(row['neg_edge_ratio']))] = []
                 family_times[row['graph_family']][(scalar,float(row['neg_edge_ratio']))].append((n, float(row['fineman_time']), float(row['bellman_ford_time'])))
+            elif row['graph_family'] == "watts-strogatz":
+                print(row['neg_edge_ratio'])
+                if (int(row['neighbors']),float(row['neg_edge_ratio']),float(row['probability'])) not in family_times[row['graph_family']]:
+                    family_times[row['graph_family']][(int(row['neighbors']),float(row['neg_edge_ratio']),float(row['probability']))] = []
+                family_times[row['graph_family']][(int(row['neighbors']),float(row['neg_edge_ratio']),float(row['probability']))].append((n, float(row['fineman_time']), float(row['bellman_ford_time'])))
             else:
                 ratio = row['neg_edge_ratio']
                 if ratio not in family_times[row['graph_family']]:
@@ -46,7 +51,7 @@ def visualize_timings(csvfile_path: Path):
         for ke,values in vmap.items():
             values.sort(key=lambda x: x[0])
             x_values = np.array([int(v[0]) for v in values])
-
+            
             plt.figure(figsize=(10, 6))
             plt.xscale("log")
             plt.loglog(x_values, [float(v[1]) for v in values], 'mo-', linewidth=2, markersize=8, label='Fineman Running time')
@@ -57,7 +62,8 @@ def visualize_timings(csvfile_path: Path):
             else:
                 plt.xlabel('Number of vertices (n)', fontsize=16)
 
-            plt.xticks(x_values, [str(val) for val in x_values],fontsize=14)
+            plt.xticks(fontsize=14)
+            plt.yticks(fontsize=14)
             plt.ylabel('Time (seconds)', fontsize=16)
             plt.grid(True, which="both", ls="--", alpha=0.8)
             plt.legend(fontsize=14)
@@ -65,8 +71,10 @@ def visualize_timings(csvfile_path: Path):
             plt.tight_layout()
             if graph_type == "random-no-neg-cycles-2":
                 plt.savefig(Path("plots/"+f"fineman_bford_comparison_{graph_type}_{ke[0]}_{1-float(ke[1])}-{ke[1]}.png"))
+            elif graph_type == "watts-strogatz":
+                plt.savefig(Path("plots/"+f"fineman_bford_comparison_{graph_type}_neighbors_{ke[0]}_ratios_{1-float(ke[1])}-{ke[1]}_probabilities_{ke[2]}.png"))
             else:
-                plt.savefig(Path("plots/"+f"fineman_bford_comparison_{graph_type}_{ke}_{1-float(ke)}-{ke}.png"))
+                plt.savefig(Path("plots/"+f"fineman_bford_comparison_{graph_type}_{1-float(ke)}-{ke}.png"))
 
 def main():
     parser = argparse.ArgumentParser()

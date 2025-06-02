@@ -6,7 +6,7 @@ import src.globals as globals
 
 SCALAR_FOR_THRESHOLD = 4
 
-def ensure_neg_vertices_has_degree_of_one(graph: dict[int, dict[int, float]]):
+def ensure_simp1(graph: dict[int, dict[int, float]]):
     
     n = len(graph.keys())
     neg_vertices = get_set_of_neg_vertices(graph)
@@ -30,7 +30,7 @@ def ensure_neg_vertices_has_degree_of_one(graph: dict[int, dict[int, float]]):
     return graph
 
 
-def ensure_max_degree(graph: dict[int, dict[int, float]], threshold: int):
+def ensure_simp2(graph: dict[int, dict[int, float]], threshold: int):
 
     n = len(graph.keys())
 
@@ -85,14 +85,14 @@ def preprocess_graph(graph: dict[int, dict[int, float]], n, m):
 
     threshold = compute_threshold(n, m)
 
-    transformed_graph = ensure_neg_vertices_has_degree_of_one(graph)
+    transformed_graph = ensure_simp1(graph)
 
     # ensure for out-degree
-    transformed_graph = ensure_max_degree(transformed_graph, threshold)
+    transformed_graph = ensure_simp2(transformed_graph, threshold)
 
     # ensure for in-degree
     transposed_graph, _ = transpose_graph(transformed_graph)
-    final_transposed_graph = ensure_max_degree(transposed_graph, threshold)
+    final_transposed_graph = ensure_simp2(transposed_graph, threshold)
     
     return transpose_graph(final_transposed_graph)
 
