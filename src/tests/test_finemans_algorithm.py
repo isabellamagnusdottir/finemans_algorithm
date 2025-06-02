@@ -12,8 +12,6 @@ from src.utils import load_test_case, NegativeCycleError
 
 TESTDATA_FILEPATH = "src/tests/test_data/"
 
-# TODO: mock test for negative sandwich
-
 def _assert_distances_are_close(actual, expected):
     assert len(actual) == len(expected)
     for i in range(len(actual)):

@@ -4,7 +4,6 @@ from src.utils.load_test_case import load_test_case
 
 TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
 
-# DEGREE OF ONE TESTS
 def test_ensure_degree_of_one_for_tree_with_neg_root():
     graph, _ = load_test_case(TESTDATA_FILEPATH + "tree_graph_two_layered_negative_root.json")
     assert len(graph[0]) == 2
@@ -25,9 +24,6 @@ def test_graph_already_adhere_to_one_degree_restriction():
     assert graph == new_graph
 
 
-
-
-# DEGREE OF AT MOST THE THRESHOLD TESTS
 @pytest.mark.parametrize("filename,threshold", [("tree_graph_two_layered_negative_root.json", 2), ("graph_already_adhere_to_one_degree_restriction.json", 2)])
 def test_max_degree_already_ensured(filename, threshold):
     graph, _ = load_test_case(TESTDATA_FILEPATH + filename)
@@ -73,8 +69,6 @@ def test_multiple_splits_on_hundred_vertex_graph(threshold, expected):
     assert len(graph.keys()) == expected
 
 
-
-# TESTS ON ENTIRE PREPROCESSING SEQUENCE
 @pytest.mark.parametrize("filename,n,m", [
     ("small_graph_with_neg_edges.json", 6, 8),
     ("high_in_degree_graph.json", 20, 19)

@@ -3,17 +3,17 @@ from math import ceil
 from src.fineman.betweenness_reduction import betweenness_reduction
 from src.fineman.core_functions import super_source_bfd, compute_reach, h_hop_sssp, \
     h_hop_stsp, reweight_graph
-from src.fineman.elimination_by_hop_reduction import elimination_of_r_remote_edges_by_hop_reduction
+from src.fineman._elimination_by_hop_reduction import _elimination_by_hop_reduction
 from src.fineman.independent_set_or_crust import find_is_or_crust
 
 
-def _compute_price_function_to_eliminate_independent_set(graph, org_neg_edges, independent_set):
+def _eliminate_1hop_IS(graph, org_neg_edges, independent_set):
     out_I = {(u,v) for u in independent_set for v in graph[u].keys()}
     graph_out_I, _ = _subgraph_of_pos_edges_and_out_set(graph, org_neg_edges, out_I)
     return super_source_bfd(graph_out_I, out_I, 1)
 
 
-def _compute_price_function_to_make_U_r_remote(graph, neg_edges, neg_edges_T, negative_sandwich, beta):
+def _make_U_r_remote(graph, neg_edges, neg_edges_T, negative_sandwich, beta):
 
     (x,U,y) = negative_sandwich
     phi = [0] * len(graph)
@@ -65,7 +65,7 @@ def elimination_algorithm(org_graph, org_neg_edges, seed = None):
                 case (x,U_2):
                     while len(U_2) > k**(1/3):
                         U_2.pop()
-                    phi_2 = _compute_price_function_to_make_U_r_remote(graph_phi1, org_neg_edges, neg_edges_T, (x,U_2,y), beta=r+1)
+                    phi_2 = _make_U_r_remote(graph_phi1, org_neg_edges, neg_edges_T, (x,U_2,y), beta=r+1)
 
                     graph_phi1_phi2, _ = reweight_graph(graph_phi1, phi_2)
 
@@ -74,14 +74,14 @@ def elimination_algorithm(org_graph, org_neg_edges, seed = None):
 
                     out_U_2 = {(u, v) for u in U_2 for v in org_graph[u].keys()}
                     graph_phi1_phi2_out_U_2, neg_edges = _subgraph_of_pos_edges_and_out_set(graph_phi1_phi2, org_neg_edges, out_U_2)
-                    phi = elimination_of_r_remote_edges_by_hop_reduction(graph_phi1_phi2_out_U_2, neg_edges, r)
+                    phi = _elimination_by_hop_reduction(graph_phi1_phi2_out_U_2, neg_edges, r)
 
                     return reweight_graph(graph_phi1_phi2, phi)
 
                 case I:
-                    phi = _compute_price_function_to_eliminate_independent_set(graph_phi1, org_neg_edges, I)
+                    phi = _eliminate_1hop_IS(graph_phi1, org_neg_edges, I)
                     return reweight_graph(graph_phi1, phi)
 
         case I:
-            phi = _compute_price_function_to_eliminate_independent_set(graph_phi1, org_neg_edges, I)
+            phi = _eliminate_1hop_IS(graph_phi1, org_neg_edges, I)
             return reweight_graph(graph_phi1, phi)

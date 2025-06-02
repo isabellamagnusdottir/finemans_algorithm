@@ -27,8 +27,6 @@ def standard_bellman_ford(graph, source: int, with_parent = False):
             if dist[u] + graph[u][v] < dist[v]:
                 if globals.WEIGHT_TYPE is float and isclose(dist[u] + graph[u][v], dist[v], abs_tol=1e-9):
                     continue
-                # TODO: Consider implementing finding the negative cycle using
-                # a predecessor array.
                 if with_parent:
                     parent[v] = u
                     cycle = []

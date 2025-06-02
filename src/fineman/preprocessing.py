@@ -50,7 +50,7 @@ def ensure_max_degree(graph: dict[int, dict[int, float]], threshold: int):
 
         mid = ceil(len(graph[vertex])/2)
 
-        # half edges
+        # halve edges
         count = 0
         for v, w in graph[vertex].items():
             if count < mid:
