@@ -3,7 +3,7 @@ import random as rand
 from math import ceil
 from src.fineman.core_functions import subset_bfd
 
-def rand_is(graph,negative_edges, negative_subset, rho) -> Set[int]:
+def rand_is(graph, negative_edges, negative_subset, rho) -> Set[int]:
 
     sample_size = ceil(rho/4)
     I_prime = set(rand.sample(tuple(negative_subset), sample_size))

@@ -86,6 +86,7 @@ def h_hop_sssp(source, graph, neg_edges: set, h: int, I_prime=None, parent=None,
         dist = dijkstra(graph, neg_edges, dist, pq, I_prime, parent, anc_in_I, save_source)
     return [dist[v][0] for v in range(len(graph))]
 
+
 def h_hop_stsp(target, graph, t_neg_edges, h: int):
     t_graph, _ = transpose_graph(graph)
     return h_hop_sssp(target, t_graph, t_neg_edges, h)

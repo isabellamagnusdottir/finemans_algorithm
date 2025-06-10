@@ -60,7 +60,7 @@ def ensure_simp2(graph: dict[int, dict[int, float]], threshold: int):
             count += 1
 
 
-        graph[vertex] = {new_vertex1:globals.WEIGHT_TYPE(0), new_vertex2:globals.WEIGHT_TYPE(0)}
+        graph[vertex] = {new_vertex1: globals.WEIGHT_TYPE(0), new_vertex2: globals.WEIGHT_TYPE(0)}
 
         # check whether new vertices violate the degree threshold
         if len(graph[new_vertex1]) > threshold:

@@ -3,14 +3,14 @@ from math import ceil
 from src.fineman.core_functions import super_source_bfd_save_rounds, super_source_bfd
 
 
-def _elimination_by_hop_reduction(graph: dict[int, dict[int, float]], neg_edge_subset: set, r):
+def _elimination_by_hop_reduction(graph, neg_edge_subset: set, r):
 
     k_hat = len(neg_edge_subset)
     dists = super_source_bfd_save_rounds(graph, neg_edge_subset, graph.keys(), r)
 
     R_set = {v for v in graph.keys() if dists[r][v] < 0}
 
-    h, h_neg_edges, mapping = construct_h(graph, neg_edge_subset, dists, R_set, r)
+    h, h_neg_edges, mapping = _construct_h(graph, neg_edge_subset, dists, R_set, r)
 
     kappa = ceil(k_hat / r)
 
@@ -24,7 +24,7 @@ def _elimination_by_hop_reduction(graph: dict[int, dict[int, float]], neg_edge_s
 
 
 
-def construct_h(graph, neg_edges, dists, R_set, r):
+def _construct_h(graph, neg_edges, dists, R_set, r):
     h = {}
     mapping = {}
 

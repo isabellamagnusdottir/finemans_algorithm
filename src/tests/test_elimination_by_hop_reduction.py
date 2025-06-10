@@ -1,6 +1,6 @@
 import pytest
 
-from src.fineman.elimination_by_hop_reduction import construct_h, _elimination_by_hop_reduction
+from src.fineman.elimination_by_hop_reduction import _construct_h, _elimination_by_hop_reduction
 from src.utils import load_test_case, NegativeCycleError
 
 TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
@@ -14,7 +14,7 @@ TESTDATA_FILEPATH = "src/tests/test_data/graphs/"
 def test_construction_of_h_with_empty_R_set(filename):
     graph, neg_edges = load_test_case(TESTDATA_FILEPATH + filename)
 
-    h, actual_neg_edges, mapping = construct_h(graph, neg_edges, [[0] * len(graph)], set(), 0)
+    h, actual_neg_edges, mapping = _construct_h(graph, neg_edges, [[0] * len(graph)], set(), 0)
 
     expected_neg_edges = {(u,v) for u, edges in h.items() for v, w in edges.items()  if w < 0}
 
@@ -47,7 +47,7 @@ def test_construction_of_h_with_empty_R_set(filename):
 def test_construction_of_h_on_dag(dists, R_set, r, expected_h):
     graph, neg_edges = load_test_case(TESTDATA_FILEPATH + "small_flow_dag.json")
 
-    h, _, mapping = construct_h(graph, neg_edges, dists, R_set, r)
+    h, _, mapping = _construct_h(graph, neg_edges, dists, R_set, r)
 
     inv_mapping = {v:k for k,v in mapping.items()}
 
@@ -74,7 +74,7 @@ def test_construction_of_h_on_dag(dists, R_set, r, expected_h):
 def test_construction_of_h_on_random_graph(dists, R_set, r, expected_h):
     graph, neg_edges = load_test_case(TESTDATA_FILEPATH + "graph_with_neg_edges.json")
 
-    h, _, mapping = construct_h(graph, neg_edges, dists, R_set, r)
+    h, _, mapping = _construct_h(graph, neg_edges, dists, R_set, r)
 
     inv_mapping = {v: k for k, v in mapping.items()}
 

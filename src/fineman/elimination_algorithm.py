@@ -31,10 +31,10 @@ def _subgraph_of_pos_edges_and_out_set(graph: dict[int, dict[int, float]], org_n
     new_graph = {}
     new_neg_edges = set()
 
-    for u, edge in graph.items():
+    for u, edges in graph.items():
         if u not in new_graph:
             new_graph[u] = {}
-        for v, w in edge.items():
+        for v, w in edges.items():
             if (u,v) in out_set or (w >= 0 and (u,v) not in org_neg_edges):
                 new_graph[u][v] = w
                 if w < 0:
@@ -59,7 +59,6 @@ def elimination_algorithm(org_graph, org_neg_edges, seed = None):
     graph_phi1, _, graph_T = reweight_graph(org_graph, phi_1, with_transpose=True)
 
     match find_is_or_crust(graph_phi1, org_neg_edges, neg_edges_T, neg_vertices):
-
         case (y,U_1):
             match find_is_or_crust(graph_T, neg_edges_T, org_neg_edges, U_1):
                 case (x,U_2):

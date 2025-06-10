@@ -70,11 +70,11 @@ def visualize_timings(csvfile_path: Path):
 
             plt.tight_layout()
             if graph_type == "random-no-neg-cycles-2":
-                plt.savefig(Path("plots/"+f"fineman_bford_comparison_{graph_type}_{ke[0]}_{1-float(ke[1])}-{ke[1]}.png"))
+                plt.savefig(Path("plots/"+f"fineman_bford_comparison_{graph_type}_{ke[0]}_{1-float(ke[1])}-{ke[1]}.png"), transparent=True)
             elif graph_type == "watts-strogatz":
-                plt.savefig(Path("plots/"+f"fineman_bford_comparison_{graph_type}_neighbors_{ke[0]}_ratios_{1-float(ke[1])}-{ke[1]}_probabilities_{ke[2]}.png"))
+                plt.savefig(Path("plots/"+f"fineman_bford_comparison_{graph_type}_neighbors_{ke[0]}_ratios_{1-float(ke[1])}-{ke[1]}_probabilities_{ke[2]}.png"), transparent=True)
             else:
-                plt.savefig(Path("plots/"+f"fineman_bford_comparison_{graph_type}_{1-float(ke)}-{ke}.png"))
+                plt.savefig(Path("plots/"+f"fineman_bford_comparison_{graph_type}_{1-float(ke)}-{ke}.png"), transparent = True)
 
 def main():
     parser = argparse.ArgumentParser()
